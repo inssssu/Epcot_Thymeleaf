@@ -56,6 +56,7 @@ public class BoardController {
 //    if (loginUserId == null) {
 //      return "redirect:/login";
 //    }
+    //dev
 
     if (title == null || title.trim().isBlank()) {
       model.addAttribute("errorMsg", "제목을 작성해 주세요");
