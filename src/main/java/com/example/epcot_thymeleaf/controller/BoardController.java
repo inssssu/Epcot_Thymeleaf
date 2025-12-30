@@ -18,21 +18,25 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/board")
 @RequiredArgsConstructor
 public class BoardController {
 
-    private final BoardService boardService;
-    private final UserService userService;
+  private final BoardService boardService;
+  private final UserService userService;
   private final UserRepository userRepository;
 
   @GetMapping("/list")
-  public String boardListPage() {
-    BoardEntity board = boardService.getList();
+  public String boardListPage(Model model) {
+    List<BoardEntity> boardList = boardService.getBoardList();
 
-      return "/board/board-list";
+    model.addAttribute("boardList", boardList);
+
+    return "/board/board-list";
   }
 
   @GetMapping("/write")
@@ -78,7 +82,7 @@ public class BoardController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 정보를 찾을 수 없습니다"));
 
     BoardEntity board = BoardEntity.builder()
-        .username(loginUser)
+        .author(loginUser)
         .title(title)
         .content(content)
         .createdAt(LocalDateTime.now())
@@ -89,5 +93,12 @@ public class BoardController {
     System.out.println("board write");
 
     return "redirect:/board/list";
+  }
+
+  @GetMapping("/detail/{id}")
+  public String boardDetailPage(@PathVariable String id) {
+
+
+    return "board/board-detail";
   }
 }

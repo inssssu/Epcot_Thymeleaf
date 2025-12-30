@@ -31,24 +31,22 @@
                 <h2>전체 게시글</h2>
                 <a class="btn btn-primary rounded-pill px-4 py-2" th:href="@{/board/write}">새 글 작성</a>
             </div>
-            <table class="table mt-2">
+            <table class="table table-striped mt-2">
                 <thead>
                 <tr>
                     <th class="text-center">번호</th>
-                    <th>제목</th>
+                    <th class="">제목</th>
                     <th class="text-center">작성자</th>
                     <th class="text-center">작성일</th>
-                    <th class="text-center">조회수</th>
                 </tr>
                 </thead>
 
                 <tbody>
-                <tr>
-                    <td class="text-center">번호</td>
-                    <td class=""><a href="" class="text-decoration-none link-dark"></a>제목</td>
-                    <td class="text-center">작성자</td>
-                    <td class="text-center">작성일</td>
-                    <td class="text-center">조회수</td>
+                <tr th:each="board, boardStat : ${boardList}">
+                    <td class="text-center" th:text="${boardStat.count}">번호</td>
+                    <td class=""><a th:href="@{/board/detail/{id}(id=${board.id})}" class="text-decoration-none link-dark" th:text="${board.title}"></a></td>
+                    <td class="text-center" th:text="${board.author.username}">작성자</td>
+                    <td class="text-center" th:text="${#temporals.format(board.createdAt, 'yyyy/MM/dd HH:mm')}">작성일</td>
                 </tr>
                 </tbody>
             </table>

@@ -20,7 +20,7 @@ public class BoardEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "login_id", nullable = false)
-    private UserEntity username;
+    private UserEntity author;
 
     @Column(name = "title", nullable = false, length = 100)
     private String title;

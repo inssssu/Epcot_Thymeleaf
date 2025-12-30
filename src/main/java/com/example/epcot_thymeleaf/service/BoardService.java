@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -19,10 +20,9 @@ public class BoardService {
   private final BoardRepository boardRepository;
   private final UserRepository userRepository;
 
-  public BoardEntity getList() {
+  public List<BoardEntity> getBoardList() {
 
-
-    return BoardEntity.builder().build();
+    return boardRepository.findByOrderByCreatedAtDesc();
   }
 
   public void write(BoardEntity board) {
