@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/board")
@@ -96,8 +97,10 @@ public class BoardController {
   }
 
   @GetMapping("/detail/{id}")
-  public String boardDetailPage(@PathVariable String id) {
+  public String boardDetailPage(@PathVariable Long id, Model model) {
+    Optional<BoardEntity> item = boardService.getBoardItem(id);
 
+    model.addAttribute("item", item.get());
 
     return "board/board-detail";
   }
