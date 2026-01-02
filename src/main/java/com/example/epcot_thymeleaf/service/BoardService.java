@@ -34,4 +34,6 @@ public class BoardService {
   public void write(BoardEntity board) {
     boardRepository.save(board);
   }
+
+  public void delete(Long id) { boardRepository.deleteById(id); }
 }
