@@ -27,8 +27,15 @@ public class BoardService {
     return boardRepository.findByOrderByCreatedAtDesc();
   }
 
-  public Optional<BoardEntity> getBoardItem(Long id) {
-    return boardRepository.findById(id);
+  public BoardEntity getBoardItem(Long id) {
+
+    BoardEntity board = boardRepository.findById(id).orElse(null);
+
+    assert board != null;
+    board.setTitle(board.getTitle());
+    board.setContent(board.getContent());
+
+    return board;
   }
 
   public void write(BoardEntity board) {

@@ -42,11 +42,11 @@
                 </thead>
 
                 <tbody>
-                <tr th:each="board, boardStat : ${boardList}">
-                    <td class="text-center" th:text="${boardStat.count}">번호</td>
-                    <td class=""><a th:href="@{/board/detail/{id}(id=${board.id})}" class="text-decoration-none link-dark" th:text="${board.title}"></a></td>
-                    <td class="text-center" th:text="${board.author.username}">작성자</td>
-                    <td class="text-center" th:text="${#temporals.format(board.createdAt, 'yyyy/MM/dd HH:mm')}">작성일</td>
+                <tr th:each="item, itemStat : ${boardList}">
+                    <td class="text-center" th:text="${itemStat.count}">번호</td>
+                    <td class=""><a th:href="@{/board/detail/{id}(id=${item.id})}" class="text-decoration-none link-dark" th:text="${item.title}"></a></td>
+                    <td class="text-center" th:text="${item.author.username}">작성자</td>
+                    <td class="text-center" th:text="${#temporals.format(item.createdAt, 'yyyy/MM/dd HH:mm')}">작성일</td>
                 </tr>
                 </tbody>
             </table>

@@ -10,28 +10,29 @@
 <body class="container mt-5">
     <div class="card board-card shadow-sm border-8">
         <div class="card-body p-4 p-md-5">
-            <form th:action="@{/board/write}" method="post">
+            <form
+                th:object="${item}"
+                th:action="*{id} == null ? @{/board/write} : @{/board/edit/{id}(id=*{id})}"
+                method="post"
+            >
                 <div class="mb-3">
                     <input
-                        id="title"
-                        name="title"
                         type="text"
                         class="form-control form-control-lg board-input"
                         placeholder="제목"
-                        th:values="${title}"
+                        th:field="*{title}"
                     >
                 </div>
 
                 <div class="mb-4">
                     <textarea
-                        id="content"
-                        name="content"
                         class="form-control board-textarea "
                         rows="12"
                         placeholder="내용"
-                        th:values="${content}"
+                        th:field="*{content}"
                     ></textarea>
                 </div>
+
 
                 <div class="mb-4 d-flex">
                     <!-- 첨부파일명 목록 -->
@@ -48,7 +49,7 @@
 
                 <div class="d-flex justify-content-end gap-3">
                     <a class="btn btn-danger" th:href="@{/board/list}">취소</a>
-                    <button class="btn btn-success">확인</button>
+                    <button type="submit" class="btn btn-success">확인</button>
                 </div>
             </form>
         </div>

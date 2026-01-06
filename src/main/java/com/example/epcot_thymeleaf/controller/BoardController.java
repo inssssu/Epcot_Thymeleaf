@@ -41,11 +41,10 @@ public class BoardController {
   }
 
   @GetMapping("/write")
-  public String boardWritePage(Model model) {
-    if (!model.containsAttribute("title")) model.addAttribute("title", "");
-    if (!model.containsAttribute("content")) model.addAttribute("content", "");
+  public String boardWritePage(BoardEntity board, Model model) {
+    model.addAttribute("item", board);
 
-    return "/board/board-write";
+    return "board/board-write";
   }
 
   @PostMapping("/write")
@@ -98,9 +97,9 @@ public class BoardController {
 
   @GetMapping("/detail/{id}")
   public String boardDetailPage(@PathVariable Long id, Model model) {
-    Optional<BoardEntity> item = boardService.getBoardItem(id);
+    BoardEntity board = boardService.getBoardItem(id);
 
-    model.addAttribute("item", item.get());
+    model.addAttribute("item", board);
 
     return "board/board-detail";
   }
@@ -110,5 +109,26 @@ public class BoardController {
     boardService.delete(id);
 
     return "redirect:/board/list";
+  }
+
+  @GetMapping("/edit/{id}")
+  public String boardEditPage(@PathVariable Long id, HttpSession httpSession, Model model) {
+    BoardEntity board = boardService.getBoardItem(id);
+
+    model.addAttribute("item", board);
+
+    return "board/board-write";
+  }
+
+  @PostMapping("/edit/{id}")
+  public String boardEdit(@PathVariable Long id, @ModelAttribute("item") BoardEntity updated, HttpSession httpSession) {
+    updated.setId(id);
+    BoardEntity board = boardService.getBoardItem(id);
+
+    board.setTitle(updated.getTitle());
+    board.setContent(updated.getContent());
+    boardService.write(board);
+
+    return "redirect:/board/detail/" + id;
   }
 }
