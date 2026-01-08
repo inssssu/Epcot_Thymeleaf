@@ -4,6 +4,7 @@ import com.example.epcot_thymeleaf.dto.response.BoardResponseDTO;
 import com.example.epcot_thymeleaf.entity.BoardEntity;
 import com.example.epcot_thymeleaf.entity.UserEntity;
 import com.example.epcot_thymeleaf.repository.UserRepository;
+import com.example.epcot_thymeleaf.service.BoardFileService;
 import com.example.epcot_thymeleaf.service.BoardService;
 import com.example.epcot_thymeleaf.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ public class BoardController {
   private final BoardService boardService;
   private final UserService userService;
   private final UserRepository userRepository;
+  private final BoardFileService boardFileService;
 
   @GetMapping("/list")
   public String boardListPage(Model model) {
@@ -49,8 +52,8 @@ public class BoardController {
 
   @PostMapping("/write")
   public String boardWrite(
-      @RequestParam String title,
-      @RequestParam String content,
+      @ModelAttribute("item") BoardEntity form,
+      @RequestParam(value = "files", required = false) List<MultipartFile> files,
       @AuthenticationPrincipal UserDetails userDetails,
       Model model
   ) {
@@ -62,18 +65,18 @@ public class BoardController {
 //    }
     //dev
 
-    if (title == null || title.trim().isBlank()) {
+    if (form.getTitle() == null || form.getTitle().trim().isBlank()) {
       model.addAttribute("errorMsg", "제목을 작성해 주세요");
-      model.addAttribute("title", title);
-      model.addAttribute("content", content);
+      model.addAttribute("title", form.getTitle());
+      model.addAttribute("content", form.getContent());
 
       return "board/board-write";
     }
 
-    if (content == null || content.trim().isBlank()) {
+    if (form.getContent() == null || form.getContent().trim().isBlank()) {
       model.addAttribute("errorMsg", "내용을 입력해 주세요");
-      model.addAttribute("title", title);
-      model.addAttribute("content", content);
+      model.addAttribute("title", form.getTitle());
+      model.addAttribute("content", form.getContent());
 
       return "board/board-write";
     }
@@ -83,16 +86,17 @@ public class BoardController {
 
     BoardEntity board = BoardEntity.builder()
         .author(loginUser)
-        .title(title)
-        .content(content)
+        .title(form.getTitle())
+        .content(form.getContent())
         .createdAt(LocalDateTime.now())
         .updatedAt(LocalDateTime.now())
         .build();
 
-    boardService.write(board);
+    boardService.write(board, files);
     System.out.println("board write");
+    boardFileService.uploadFiles(board.getId(), files);
 
-    return "redirect:/board/list";
+    return "redirect:/board/list" + board.getId();
   }
 
   @GetMapping("/detail/{id}")
@@ -100,6 +104,7 @@ public class BoardController {
     BoardEntity board = boardService.getBoardItem(id);
 
     model.addAttribute("item", board);
+    model.addAttribute("attachedFiles", boardFileService.getFiles(id));
 
     return "board/board-detail";
   }
@@ -116,19 +121,30 @@ public class BoardController {
     BoardEntity board = boardService.getBoardItem(id);
 
     model.addAttribute("item", board);
+    model.addAttribute("attachedFiles", boardFileService.getFiles(id));
 
     return "board/board-write";
   }
 
   @PostMapping("/edit/{id}")
-  public String boardEdit(@PathVariable Long id, @ModelAttribute("item") BoardEntity updated, HttpSession httpSession) {
-    updated.setId(id);
+  public String boardEdit(
+      @PathVariable Long id,
+      @ModelAttribute("item") BoardEntity form,
+      @RequestParam List<MultipartFile> files,
+      HttpSession httpSession) {
+
+    form.setId(id);
+
     BoardEntity board = boardService.getBoardItem(id);
 
-    board.setTitle(updated.getTitle());
-    board.setContent(updated.getContent());
-    boardService.write(board);
+    board.setTitle(form.getTitle());
+    board.setContent(form.getContent());
+    board.setUpdatedAt(LocalDateTime.now());
+    boardService.write(board, files);
+    boardFileService.uploadFiles(id, files);
 
     return "redirect:/board/detail/" + id;
   }
+
+
 }

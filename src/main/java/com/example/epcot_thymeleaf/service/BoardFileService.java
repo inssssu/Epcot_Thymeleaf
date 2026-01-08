@@ -1,0 +1,66 @@
+package com.example.epcot_thymeleaf.service;
+
+import com.example.epcot_thymeleaf.entity.BoardFileEntity;
+import com.example.epcot_thymeleaf.repository.BoardFileRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class BoardFileService {
+
+  private final BoardFileRepository boardFileRepository;
+
+  @Value("${org.zerock.upload.path}")
+  private String uploadDir;
+
+  public void uploadFiles(Long boardId, List<MultipartFile> files) {
+    if (files == null || files.isEmpty()) {
+      return;
+    }
+
+    try {
+      Path dir = Paths.get(uploadDir, "board", String.valueOf(boardId));
+      Files.createDirectories(dir);
+
+      for (MultipartFile file : files) {
+        if (file == null || file.isEmpty()) {
+          continue;
+        }
+
+        String original = file.getOriginalFilename();
+        String stored = UUID.randomUUID() + "_" + (original == null ? "file" : original);
+
+        Path target = dir.resolve(stored);
+        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+        BoardFileEntity meta = new BoardFileEntity();
+        meta.setBoardId(boardId);
+        meta.setOriginalName(original);
+        meta.setStoredName(stored);
+        meta.setStoredPath(target.toString());
+        meta.setContentType(file.getContentType());
+        meta.setSize(file.getSize());
+
+        boardFileRepository.save(meta);
+      }
+
+    } catch (IOException e) {
+      throw new RuntimeException("파일 업로드 실패", e);
+    }
+  }
+
+  public List<BoardFileEntity> getFiles(Long boardId) {
+    return boardFileRepository.findAllByBoardIdOrderByIdDesc(boardId);
+  }
+}
