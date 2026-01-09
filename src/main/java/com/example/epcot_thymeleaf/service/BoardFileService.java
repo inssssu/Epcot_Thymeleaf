@@ -3,11 +3,19 @@ package com.example.epcot_thymeleaf.service;
 import com.example.epcot_thymeleaf.entity.BoardFileEntity;
 import com.example.epcot_thymeleaf.repository.BoardFileRepository;
 import lombok.RequiredArgsConstructor;
+import org.osgi.resource.Resource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,5 +70,32 @@ public class BoardFileService {
 
   public List<BoardFileEntity> getFiles(Long boardId) {
     return boardFileRepository.findAllByBoardIdOrderByIdDesc(boardId);
+  }
+
+  public ResponseEntity<UrlResource> download(Long fileId) {
+
+    BoardFileEntity meta = boardFileRepository.findById(fileId)
+        .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다"));
+
+    try {
+      Path path = Paths.get(meta.getStoredPath());
+      UrlResource resource = new UrlResource(path.toUri());
+
+      if (!resource.exists()) {
+        return ResponseEntity.notFound().build();
+      }
+
+      ContentDisposition contentDisposition = ContentDisposition.attachment()
+          .filename(meta.getOriginalName(), StandardCharsets.UTF_8)
+          .build();
+
+      return ResponseEntity.ok()
+          .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+          .contentType(MediaType.APPLICATION_OCTET_STREAM)
+          .body(resource);
+
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("다운로드 처리 실패", e);
+    }
   }
 }

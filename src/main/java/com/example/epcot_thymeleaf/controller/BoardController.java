@@ -9,6 +9,7 @@ import com.example.epcot_thymeleaf.service.BoardService;
 import com.example.epcot_thymeleaf.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -96,7 +97,7 @@ public class BoardController {
     System.out.println("board write");
     boardFileService.uploadFiles(board.getId(), files);
 
-    return "redirect:/board/list" + board.getId();
+    return "redirect:/board/detail/" + board.getId();
   }
 
   @GetMapping("/detail/{id}")
@@ -146,5 +147,9 @@ public class BoardController {
     return "redirect:/board/detail/" + id;
   }
 
+  @GetMapping("/files/{fileId}/download")
+  public ResponseEntity<UrlResource> fileDownload(@PathVariable Long fileId, Model model) {
 
+    return boardFileService.download(fileId);
+  }
 }
