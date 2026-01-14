@@ -36,7 +36,12 @@ public class BoardController {
   private final BoardFileService boardFileService;
 
   @GetMapping("/list")
-  public String boardListPage(Model model) {
+  public String boardListPage(Model model, UserEntity user) {
+    if (user != null) {
+      model.addAttribute("loginId", user.getUsername());
+      System.out.println("Username is not null");
+    }
+
     List<BoardEntity> boardList = boardService.getBoardList();
 
     model.addAttribute("boardList", boardList);
@@ -101,7 +106,11 @@ public class BoardController {
   }
 
   @GetMapping("/detail/{id}")
-  public String boardDetailPage(@PathVariable Long id, Model model) {
+  public String boardDetailPage(@PathVariable Long id, UserEntity user, Model model) {
+    if (user != null) {
+      model.addAttribute("loginId", user.getUsername());
+    }
+
     BoardEntity board = boardService.getBoardItem(id);
 
     model.addAttribute("item", board);

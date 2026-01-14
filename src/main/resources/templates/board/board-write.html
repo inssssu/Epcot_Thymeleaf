@@ -42,17 +42,20 @@
                         <div th:if="${attachedFiles == null || #lists.isEmpty(attachedFiles)}" id="fileNameText">
                             선택된 파일이 없습니다
                         </div>
-                        <ul class="mb-0" th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
+                        <ul class="mb-0" id="attachedFileList" th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
                             <li th:each="f : ${attachedFiles}" th:text="${f.originalName}">file</li>
-                        </ul>
-                    </div>
 
+                        </ul>
+
+                        <ul class="mb-0" id="selectedFileList" style="display:none;"></ul>
+
+                    </div>
 
                     <!-- 첨부파일 업로드 버튼  -->
                     <div class="d-flex align-items-start">
                         <label class="btn btn-primary mb-0">
                             파일첨부
-                            <input type="file" name="files" class="form-control"
+                            <input class="form-control" type="file" name="files"
                                    onChange="onFileChange(this)" multiple hidden>
                         </label>
                     </div>
@@ -69,12 +72,34 @@
 
 <script th:inline="javascript">
     function onFileChange(input) {
-        const label = document.getElementById('fileNameText');
+        // const label = document.getElementById('fileNameText');
+        //
+        // if (input.files && input.files.length > 0) {
+        //     label.textContent = input.files[0].name;
+        // } else {
+        //     label.textContent = '선택된 파일이 없습니다';
+        // }
 
-        if (input.files && input.files.length > 0) {
-            label.textContent = input.files[0].name;
-        } else {
-            label.textContent = '선택된 파일이 없습니다';
+        const files = input.files;
+
+        const emptyText = document.getElementById('fileNameText');
+        const selectedList = document.getElementById('selectedFileList');
+
+        if (!files || files.length === 0) {
+            if (selectedList) selectedList.style.display = 'none';
+            if (emptyText) emptyText.style.display = 'none';
+            return;
+        }
+
+        if (emptyText) emptyText.style.display = 'none';
+
+        if (selectedList) {
+            selectedList.style.display = '';
+            Array.from(files).forEach(f => {
+                const li = document.createElement('li');
+                li.textContent = f.name;
+                selectedList.appendChild(li);
+            });
         }
     }
 </script>

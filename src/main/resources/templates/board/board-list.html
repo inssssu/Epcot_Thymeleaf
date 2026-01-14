@@ -18,8 +18,11 @@
                 <button class="btn btn-outline-primary">1</button>
                 <button class="btn btn-danger">2</button>
                 <button class="btn btn-success">3</button>
-                <div>
+                <div th:if="${loginId == null}">
                     <button class="btn btn-outline-primary">로그인</button>
+                </div>
+                <div th:if="${loginId != null}">
+                    <button type="button" class="btn btn-outline-primary" th:text="${loginId}">id</button>
                 </div>
             </div>
         </div>
