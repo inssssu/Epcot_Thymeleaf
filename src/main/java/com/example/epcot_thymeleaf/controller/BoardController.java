@@ -10,8 +10,14 @@ import com.example.epcot_thymeleaf.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -36,15 +42,19 @@ public class BoardController {
   private final BoardFileService boardFileService;
 
   @GetMapping("/list")
-  public String boardListPage(Model model, UserEntity user) {
+  public String boardListPage(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model, Authentication user) {
     if (user != null) {
-      model.addAttribute("loginId", user.getUsername());
+      model.addAttribute("loginId", user.getName());
       System.out.println("Username is not null");
     }
 
-    List<BoardEntity> boardList = boardService.getBoardList();
+//    List<BoardEntity> boardList = boardService.getBoardList();
 
-    model.addAttribute("boardList", boardList);
+    Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
+    model.addAttribute("boardPage", boardPage);
+    model.addAttribute("boardList", boardPage.getContent());
+
+    model.addAttribute("page", boardPage.getNumber());
 
     return "/board/board-list";
   }
@@ -106,15 +116,22 @@ public class BoardController {
   }
 
   @GetMapping("/detail/{id}")
-  public String boardDetailPage(@PathVariable Long id, UserEntity user, Model model) {
+  public String boardDetailPage(
+      @PathVariable Long id,
+      @RequestParam(defaultValue = "1") int page,
+      Authentication user,
+      Model model
+    ) {
     if (user != null) {
-      model.addAttribute("loginId", user.getUsername());
+      model.addAttribute("loginId", user.getName());
     }
 
     BoardEntity board = boardService.getBoardItem(id);
 
     model.addAttribute("item", board);
     model.addAttribute("attachedFiles", boardFileService.getFiles(id));
+
+    model.addAttribute("page", page);
 
     return "board/board-detail";
   }

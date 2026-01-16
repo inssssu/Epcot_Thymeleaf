@@ -13,11 +13,8 @@
             logo
         </div>
         <div class="col-5 justify-content-end navbar ms-4">
-            <div class="d-flex gap-3 ">
+            <div class="d-flex gap-3">
                 <button class="btn btn-outline-primary">목록</button>
-                <button class="btn btn-outline-primary">1</button>
-                <button class="btn btn-danger">2</button>
-                <button class="btn btn-success">3</button>
                 <div th:if="${loginId == null}">
                     <button class="btn btn-outline-primary">로그인</button>
                 </div>
@@ -37,23 +34,39 @@
             <table class="table table-striped mt-2">
                 <thead>
                 <tr>
-                    <th class="text-center">번호</th>
-                    <th class="">제목</th>
-                    <th class="text-center">작성자</th>
-                    <th class="text-center">작성일</th>
+                    <th class="text-center" style="width: 10%">번호</th>
+                    <th class="" style="width: 50%">제목</th>
+                    <th class="text-center" style="width: 15%">작성자</th>
+                    <th class="text-center" style="width: 25%">작성일</th>
                 </tr>
-                </thead>
+                </thead>`
 
                 <tbody>
                 <tr th:each="item, itemStat : ${boardList}">
-                    <td class="text-center" th:text="${itemStat.count}">번호</td>
-                    <td class=""><a th:href="@{/board/detail/{id}(id=${item.id})}" class="text-decoration-none link-dark" th:text="${item.title}"></a></td>
+                    <td class="text-center" th:text="${boardPage.totalElements - (boardPage.number * boardPage.size + itemStat.index)}">번호</td>
+                    <td class=""><a th:href="@{/board/detail/{id}(id=${item.id}, page=${page})}" class="text-decoration-none link-dark" th:text="${item.title}"></a></td>
                     <td class="text-center" th:text="${item.author.username}">작성자</td>
                     <td class="text-center" th:text="${#temporals.format(item.createdAt, 'yyyy/MM/dd HH:mm')}">작성일</td>
                 </tr>
                 </tbody>
             </table>
         </div>
+        <nav th:if="${boardPage.totalPages > 1}" aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${!boardPage.hasPrevious()} ? ' disabled'">
+                    <a class="page-link" th:href="@{/board/list(page=${boardPage.number - 1})}" tabindex="-1">이전</a>
+                </li>
+
+                <li class="page-item" th:each="p : ${#numbers.sequence(0, boardPage.totalPages - 1)}"
+                    th:classappend="${p == boardPage.number} ? ' active'">
+                    <a class="page-link" th:href="@{/board/list(page=${p})}" th:text="${p + 1}">1</a>
+                </li>
+
+                <li class="page-item" th:classappend="${!boardPage.hasNext()} ? ' disabled'">
+                    <a class="page-link" th:href="@{/board/list(page=${boardPage.number + 1})}">다음</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </body>
 </html>
