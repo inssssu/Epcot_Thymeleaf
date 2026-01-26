@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<div class="d-flex justify-content-between" th:fragment="header">
+    <div>
+        <a th:href="@{/}">
+            Logo
+        </a>
+    </div>
+    <div class="col-5 justify-content-end navbar ms-4">
+        <div class="d-flex gap-3 align-items-center">
+            <a class="btn btn-outline-primary" th:href="@{/board/list}">게시글</a>
+
+            <div sec:authorize="isAnonymous()">
+                <a class="btn btn-outline-primary" th:href="@{/auth/login}">로그인</a>
+            </div>
+
+            <div sec:authorize="isAuthenticated()">
+                <a class="btn btn-outline-primary" th:href="@{/mypage}" th:text="${#authentication.name}">id</a>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

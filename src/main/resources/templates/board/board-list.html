@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -8,26 +9,29 @@
 
 </head>
 <body class="container mt-5 ">
-    <div class="d-flex justify-content-between">
-        <div class="bg-info m-3">
-            logo
-        </div>
-        <div class="col-5 justify-content-end navbar ms-4">
-            <div class="d-flex gap-3">
-                <button class="btn btn-outline-primary">목록</button>
-                <div th:if="${loginId == null}">
-                    <a th:href="@{/login}" class="btn btn-outline-primary">로그인</a>
-                </div>
-                <div th:if="${loginId != null}">
-                    <a type="button" class="btn btn-outline-primary" th:text="${loginId}"
-                       th:href="@{/mypage}"
-                    >
-                        id
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <header>
+        <div th:replace="~{fragment/header :: header}"></div>
+    </header>
+<!--    <div class="d-flex justify-content-between">-->
+<!--        <div class="bg-info m-3">-->
+<!--            logo-->
+<!--        </div>-->
+<!--        <div class="col-5 justify-content-end navbar ms-4">-->
+<!--            <div class="d-flex gap-3">-->
+<!--                <button class="btn btn-outline-primary">목록</button>-->
+<!--                <div th:if="${loginId == null}">-->
+<!--                    <a th:href="@{/login}" class="btn btn-outline-primary">로그인</a>-->
+<!--                </div>-->
+<!--                <div th:if="${loginId != null}">-->
+<!--                    <a type="button" class="btn btn-outline-primary" th:text="${loginId}"-->
+<!--                       th:href="@{/mypage}"-->
+<!--                    >-->
+<!--                        id-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <div class="container-lg my-4 py-4 ">
         <div>

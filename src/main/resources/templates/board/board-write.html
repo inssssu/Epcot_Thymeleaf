@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>board write</title>
@@ -7,8 +8,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
 </head>
+<header>
+    <div th:replace="~{fragment/header :: header}"></div>
+</header>
 <body class="container mt-5">
-    <div class="card board-card shadow-sm border-8">
+    <div class="card board-card shadow-sm border-8 mt-3">
         <div class="card-body p-4 p-md-5">
             <form
                 th:object="${item}"

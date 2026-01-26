@@ -2,6 +2,7 @@ package com.example.epcot_thymeleaf.controller;
 
 import com.example.epcot_thymeleaf.entity.BoardEntity;
 import com.example.epcot_thymeleaf.entity.UserEntity;
+import com.example.epcot_thymeleaf.service.BoardService;
 import com.example.epcot_thymeleaf.service.MypageService;
 import com.example.epcot_thymeleaf.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class AuthController {
 
   private final MypageService mypageService;
   private final UserService userService;
+  private final BoardService boardService;
 
   @GetMapping("/login")
   public String login(Authentication authentication, Model model) {
@@ -54,17 +56,19 @@ public class AuthController {
   public String mypage(
       @RequestParam(defaultValue = "0") int page,
       Authentication authentication,
-      Model model
-    ) {
+      Model model,
+      Pageable pageable) {
 
     String loginId = authentication.getName();
 
     UserEntity user = mypageService.getUserByLoginId(loginId);
     Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(user.getId(), page);
+    Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
 
     model.addAttribute("user", user);
     model.addAttribute("myBoardsPage", myBoardsPage);
-    model.addAttribute("page", myBoardsPage.getContent());
+//    model.addAttribute("navPage", boardPage.getNumber());
+    model.addAttribute("page", boardPage.getNumber());
 
     return "auth/mypage";
   }
