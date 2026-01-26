@@ -48,7 +48,7 @@ public class BoardController {
       System.out.println("Username is not null");
     }
 
-//    List<BoardEntity> boardList = boardService.getBoardList();
+//    List<BoardEntity> boardList = boardService.getBoardList   ();
 
     Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
     model.addAttribute("boardPage", boardPage);

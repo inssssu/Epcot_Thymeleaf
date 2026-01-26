@@ -16,10 +16,14 @@
             <div class="d-flex gap-3">
                 <button class="btn btn-outline-primary">목록</button>
                 <div th:if="${loginId == null}">
-                    <button class="btn btn-outline-primary">로그인</button>
+                    <a th:href="@{/login}" class="btn btn-outline-primary">로그인</a>
                 </div>
                 <div th:if="${loginId != null}">
-                    <button type="button" class="btn btn-outline-primary" th:text="${loginId}">id</button>
+                    <a type="button" class="btn btn-outline-primary" th:text="${loginId}"
+                       th:href="@{/mypage}"
+                    >
+                        id
+                    </a>
                 </div>
             </div>
         </div>
@@ -35,11 +39,11 @@
                 <thead>
                 <tr>
                     <th class="text-center" style="width: 10%">번호</th>
-                    <th class="" style="width: 50%">제목</th>
-                    <th class="text-center" style="width: 15%">작성자</th>
-                    <th class="text-center" style="width: 25%">작성일</th>
+                    <th class="text-center" style="width: 55%">제목</th>
+                    <th class="text-center" style="width: 10%">작성자</th>
+                    <th class="text-center" style="width: 15%">작성일</th>
                 </tr>
-                </thead>`
+                </thead>
 
                 <tbody>
                 <tr th:each="item, itemStat : ${boardList}">

@@ -1,14 +1,30 @@
 package com.example.epcot_thymeleaf.controller;
 
+import com.example.epcot_thymeleaf.entity.BoardEntity;
+import com.example.epcot_thymeleaf.entity.UserEntity;
+import com.example.epcot_thymeleaf.service.MypageService;
+import com.example.epcot_thymeleaf.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class AuthController {
+
+  private final MypageService mypageService;
+  private final UserService userService;
 
   @GetMapping("/login")
   public String login(Authentication authentication, Model model) {
@@ -32,5 +48,24 @@ public class AuthController {
   public String index() {
 
     return "index";
+  }
+
+  @GetMapping("/mypage")
+  public String mypage(
+      @RequestParam(defaultValue = "0") int page,
+      Authentication authentication,
+      Model model
+    ) {
+
+    String loginId = authentication.getName();
+
+    UserEntity user = mypageService.getUserByLoginId(loginId);
+    Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(user.getId(), page);
+
+    model.addAttribute("user", user);
+    model.addAttribute("myBoardsPage", myBoardsPage);
+    model.addAttribute("page", myBoardsPage.getContent());
+
+    return "auth/mypage";
   }
 }
