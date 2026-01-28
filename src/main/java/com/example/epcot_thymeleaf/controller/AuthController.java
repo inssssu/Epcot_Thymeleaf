@@ -46,23 +46,22 @@ public class AuthController {
     return "auth/login";
   }
 
-  @GetMapping("/")
-  public String index() {
-
-    return "index";
-  }
+//  @GetMapping("/")
+//  public String index() {
+//
+//    return "index";
+//  }
 
   @GetMapping("/mypage")
   public String mypage(
-      @RequestParam(defaultValue = "0") int page,
+      @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
       Authentication authentication,
-      Model model,
-      Pageable pageable) {
+      Model model) {
 
     String loginId = authentication.getName();
 
     UserEntity user = mypageService.getUserByLoginId(loginId);
-    Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(user.getId(), page);
+    Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(pageable);
     Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
 
     model.addAttribute("user", user);

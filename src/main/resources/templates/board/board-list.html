@@ -12,27 +12,6 @@
     <header>
         <div th:replace="~{fragment/header :: header}"></div>
     </header>
-<!--    <div class="d-flex justify-content-between">-->
-<!--        <div class="bg-info m-3">-->
-<!--            logo-->
-<!--        </div>-->
-<!--        <div class="col-5 justify-content-end navbar ms-4">-->
-<!--            <div class="d-flex gap-3">-->
-<!--                <button class="btn btn-outline-primary">목록</button>-->
-<!--                <div th:if="${loginId == null}">-->
-<!--                    <a th:href="@{/login}" class="btn btn-outline-primary">로그인</a>-->
-<!--                </div>-->
-<!--                <div th:if="${loginId != null}">-->
-<!--                    <a type="button" class="btn btn-outline-primary" th:text="${loginId}"-->
-<!--                       th:href="@{/mypage}"-->
-<!--                    >-->
-<!--                        id-->
-<!--                    </a>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
     <div class="container-lg my-4 py-4 ">
         <div>
             <div class="d-flex justify-content-between">
@@ -52,7 +31,7 @@
                 <tbody>
                 <tr th:each="item, itemStat : ${boardList}">
                     <td class="text-center" th:text="${boardPage.totalElements - (boardPage.number * boardPage.size + itemStat.index)}">번호</td>
-                    <td class=""><a th:href="@{/board/detail/{id}(id=${item.id}, page=${page})}" class="text-decoration-none link-dark" th:text="${item.title}"></a></td>
+                    <td class=""><a th:href="@{/board/detail/{id}(id=${item.id}, page=${page + 1})}" class="text-decoration-none link-dark" th:text="${item.title}"></a></td>
                     <td class="text-center" th:text="${item.author.username}">작성자</td>
                     <td class="text-center" th:text="${#temporals.format(item.createdAt, 'yyyy/MM/dd HH:mm')}">작성일</td>
                 </tr>
@@ -62,16 +41,16 @@
         <nav th:if="${boardPage.totalPages > 1}" aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${!boardPage.hasPrevious()} ? ' disabled'">
-                    <a class="page-link" th:href="@{/board/list(page=${boardPage.number - 1})}" tabindex="-1">이전</a>
+                    <a class="page-link" th:href="@{/board/list(page=${boardPage.number})}" tabindex="-1">이전</a>
                 </li>
 
-                <li class="page-item" th:each="p : ${#numbers.sequence(0, boardPage.totalPages - 1)}"
-                    th:classappend="${p == boardPage.number} ? ' active'">
-                    <a class="page-link" th:href="@{/board/list(page=${p})}" th:text="${p + 1}">1</a>
+                <li class="page-item" th:each="p : ${#numbers.sequence(1, boardPage.totalPages)}"
+                    th:classappend="${p == boardPage.number + 1} ? ' active'">
+                    <a class="page-link" th:href="@{/board/list(page=${p})}" th:text="${p}">1</a>
                 </li>
 
                 <li class="page-item" th:classappend="${!boardPage.hasNext()} ? ' disabled'">
-                    <a class="page-link" th:href="@{/board/list(page=${boardPage.number + 1})}">다음</a>
+                    <a class="page-link" th:href="@{/board/list(page=${boardPage.number + 2})}">다음</a>
                 </li>
             </ul>
         </nav>

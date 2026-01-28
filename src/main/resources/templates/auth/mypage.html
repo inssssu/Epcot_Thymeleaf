@@ -56,16 +56,16 @@
                             <nav th:if="${myBoardsPage.totalPages > 1}" aria-label="Page navigation" class="mt-3">
                                 <ul class="pagination justify-content-center">
                                     <li class="page-item" th:classappend="${!myBoardsPage.hasPrevious()} ? ' disabled'">
-                                        <a class="page-link" th:href="@{/mypage(page=${myBoardsPage.number - 1})}" tabindex="-1">이전</a>
+                                        <a class="page-link" th:href="@{/mypage(page=${myBoardsPage.number})}" tabindex="-1">이전</a>
                                     </li>
 
-                                    <li class="page-item" th:each="p : ${#numbers.sequence(0, myBoardsPage.totalPages - 1)}"
-                                        th:classappend="${p == myBoardsPage.number} ? ' active'">
-                                        <a class="page-link" th:href="@{/mypage(page=${p})}" th:text="${p + 1}">1</a>
+                                    <li class="page-item" th:each="p : ${#numbers.sequence(1, myBoardsPage.totalPages)}"
+                                        th:classappend="${p == myBoardsPage.number + 1} ? ' active'">
+                                        <a class="page-link" th:href="@{/mypage(page=${p})}" th:text="${p}">1</a>
                                     </li>
 
                                     <li class="page-item" th:classappend="${!myBoardsPage.hasNext()} ? ' disabled'">
-                                        <a class="page-link" th:href="@{/mypage(page=${myBoardsPage.number + 1})}">다음</a>
+                                        <a class="page-link" th:href="@{/mypage(page=${myBoardsPage.number + 2})}">다음</a>
                                     </li>
                                 </ul>
                             </nav>

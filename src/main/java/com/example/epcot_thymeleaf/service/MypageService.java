@@ -29,10 +29,8 @@ public class MypageService {
     return boardRepository.findAllByIdOrderById(userId);
   }
 
-  public Page<BoardEntity> getMyBoardsPage(Long userId, int page) {
+  public Page<BoardEntity> getMyBoardsPage(Pageable pageable) {
 
-    Pageable pageable = PageRequest.of(page, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-    return boardRepository.findByAuthor_IdOrderByCreatedAtDesc(userId, pageable);
+    return boardRepository.findAll(pageable);
   }
 }

@@ -53,7 +53,6 @@ public class BoardController {
     Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
     model.addAttribute("boardPage", boardPage);
     model.addAttribute("boardList", boardPage.getContent());
-
     model.addAttribute("page", boardPage.getNumber());
 
     return "/board/board-list";
@@ -118,7 +117,7 @@ public class BoardController {
   @GetMapping("/detail/{id}")
   public String boardDetailPage(
       @PathVariable Long id,
-      @RequestParam(defaultValue = "1") int page,
+      @PageableDefault Pageable pageable,
       Authentication user,
       Model model
     ) {
@@ -127,11 +126,12 @@ public class BoardController {
     }
 
     BoardEntity board = boardService.getBoardItem(id);
+    Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
 
     model.addAttribute("item", board);
     model.addAttribute("attachedFiles", boardFileService.getFiles(id));
 
-    model.addAttribute("page", page);
+    model.addAttribute("page", boardPage.getNumber());
 
     return "board/board-detail";
   }

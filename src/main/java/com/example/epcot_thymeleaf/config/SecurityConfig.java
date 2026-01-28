@@ -23,22 +23,34 @@ public class SecurityConfig {
         System.out.println(new BCryptPasswordEncoder().encode("1234"));
 
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/login", "/board/list", "/error").permitAll()
-                .anyRequest().authenticated()
+            .requestMatchers(
+              "/",
+              "/auth/**",
+              "/board/list",
+              "/board/detail/**",
+              "/error"
+            ).permitAll()
+            .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+            .anyRequest().authenticated()
         );
 
         http.formLogin((auth) -> auth
-                .loginProcessingUrl("/login")
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/board/list", true)
-                .failureUrl("/login?error")
-                .permitAll()
-        )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/")
-                );
+//              .loginPage("/login")    // 사용자 커스텀 로그인폼을 사용하겠다 할 때 적용
+              .loginProcessingUrl("/login")
+              .usernameParameter("username")
+              .passwordParameter("password")
+              .defaultSuccessUrl("/board/list", true)
+              .failureUrl("/login?error")
+              .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/board/list")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+        );
+
+
 //                .formLogin()        // success handler, fail handler 설정
         // sha-512 : 암호화만 되는 복호화 되지 않음.
 
