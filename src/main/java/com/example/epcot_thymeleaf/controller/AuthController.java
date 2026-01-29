@@ -54,6 +54,7 @@ public class AuthController {
 
   @GetMapping("/mypage")
   public String mypage(
+      // WebConfig 의 setOneIndexParameter 를 사용하기 위해선 @PageableDefault 를 사용해야 적용시킬 수 있음
       @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
       Authentication authentication,
       Model model) {

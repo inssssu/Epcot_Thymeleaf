@@ -23,7 +23,7 @@
                 <div class="d-flex justify-content-between">
                     <div class="card p-3">
                         상세정보
-                        <div class="card-body" style="width: 25rem; height: 25rem">
+                        <div class="card-body" style="width: 25rem; height: 15rem">
                             <dl class="row mb-0">
                                 <dt class="col-4- text-secondary">아이디</dt>
                                 <dd class="col-8" th:text="${user.username}">test</dd>
@@ -56,6 +56,10 @@
                             <nav th:if="${myBoardsPage.totalPages > 1}" aria-label="Page navigation" class="mt-3">
                                 <ul class="pagination justify-content-center">
                                     <li class="page-item" th:classappend="${!myBoardsPage.hasPrevious()} ? ' disabled'">
+                                        <a class="page-link" th:href="@{/mypage(page=1)}"><<</a>
+                                    </li>
+
+                                    <li class="page-item" th:classappend="${!myBoardsPage.hasPrevious()} ? ' disabled'">
                                         <a class="page-link" th:href="@{/mypage(page=${myBoardsPage.number})}" tabindex="-1">이전</a>
                                     </li>
 
@@ -66,6 +70,10 @@
 
                                     <li class="page-item" th:classappend="${!myBoardsPage.hasNext()} ? ' disabled'">
                                         <a class="page-link" th:href="@{/mypage(page=${myBoardsPage.number + 2})}">다음</a>
+                                    </li>
+
+                                    <li class="page-item" th:classappend="${!myBoardsPage.hasNext()} ? ' disabled'">
+                                        <a class="page-link" th:href="@{/mypage(page=${myBoardsPage.getTotalPages()})}">>></a>
                                     </li>
                                 </ul>
                             </nav>
