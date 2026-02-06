@@ -3,7 +3,6 @@ package com.example.epcot_thymeleaf.service;
 import com.example.epcot_thymeleaf.entity.BoardFileEntity;
 import com.example.epcot_thymeleaf.repository.BoardFileRepository;
 import lombok.RequiredArgsConstructor;
-import org.osgi.resource.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ContentDisposition;
@@ -96,6 +95,36 @@ public class BoardFileService {
 
     } catch (MalformedURLException e) {
       throw new RuntimeException("다운로드 처리 실패", e);
+    }
+  }
+
+  /** 이미지 등 브라우저에서 바로 보여줄 때 사용. inline + 실제 Content-Type */
+  public ResponseEntity<UrlResource> view(Long fileId) {
+    BoardFileEntity meta = boardFileRepository.findById(fileId)
+        .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다"));
+
+    try {
+      Path path = Paths.get(meta.getStoredPath());
+      UrlResource resource = new UrlResource(path.toUri());
+
+      if (!resource.exists()) {
+        return ResponseEntity.notFound().build();
+      }
+
+      MediaType mediaType = meta.getContentType() != null && meta.getContentType().startsWith("image/")
+          ? MediaType.parseMediaType(meta.getContentType())
+          : MediaType.APPLICATION_OCTET_STREAM;
+
+      ContentDisposition contentDisposition = ContentDisposition.inline()
+          .filename(meta.getOriginalName(), StandardCharsets.UTF_8)
+          .build();
+
+      return ResponseEntity.ok()
+          .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+          .contentType(mediaType)
+          .body(resource);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("파일 조회 실패", e);
     }
   }
 }

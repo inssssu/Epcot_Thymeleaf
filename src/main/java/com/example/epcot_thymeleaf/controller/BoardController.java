@@ -174,8 +174,12 @@ public class BoardController {
   }
 
   @GetMapping("/files/{fileId}/download")
-  public ResponseEntity<UrlResource> fileDownload(@PathVariable Long fileId, Model model) {
-
+  public ResponseEntity<UrlResource> fileDownload(@PathVariable Long fileId) {
     return boardFileService.download(fileId);
+  }
+
+  @GetMapping("/files/{fileId}/view")
+  public ResponseEntity<UrlResource> fileView(@PathVariable Long fileId) {
+    return boardFileService.view(fileId);
   }
 }

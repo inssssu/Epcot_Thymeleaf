@@ -43,12 +43,26 @@
                 첨부파일이 없습니다
             </div>
 
-            <ul th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}" class="mb-0">
-                <li th:each="f : ${attachedFiles}">
-                    <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}"
-                       th:text="${f.originalName}" id="fileNameText">download</a>
-                </li>
-            </ul>
+            <div th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
+                <!-- 이미지: 미리보기 + 다운로드 링크 -->
+                <div class="d-flex flex-wrap gap-3 mb-2">
+                    <div th:each="f : ${attachedFiles}" class="border rounded p-2">
+                        <th:block th:if="${f.contentType != null && #strings.startsWith(f.contentType, 'image/')}">
+                            <a th:href="@{/board/files/{fileId}/view(fileId=${f.id})}" target="_blank">
+                                <img th:src="@{/board/files/{fileId}/view(fileId=${f.id})}"
+                                     th:alt="${f.originalName}"
+                                     class="img-thumbnail" style="max-width: 200px; max-height: 200px; object-fit: contain;">
+                            </a>
+                            <div class="small mt-1">
+                                <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}" th:text="${f.originalName}">file</a>
+                            </div>
+                        </th:block>
+                        <th:block th:unless="${f.contentType != null && #strings.startsWith(f.contentType, 'image/')}">
+                            <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}" th:text="${f.originalName}">download</a>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="d-flex justify-content-between">
             <div>
