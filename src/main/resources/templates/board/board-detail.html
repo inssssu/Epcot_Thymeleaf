@@ -33,12 +33,24 @@
                 첨부파일이 없습니다
             </div>
 
-            <ul th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}" class="mb-0">
-                <li th:each="f : ${attachedFiles}">
-                    <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}"
-                       th:text="${f.originalName}" id="fileNameText">download</a>
-                </li>
-            </ul>
+            <div th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
+                <ul class="d-flex mb-3" style="list-style: none; padding-left: 0;">
+                    <li th:each="f : ${attachedFiles}" class="me-4">
+                        <i class="bi bi-file-earmark-arrow-down"></i> <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}"
+                                                                         th:text="${f.originalName}" class="text-decoration-none">download</a>
+                    </li>
+                </ul>
+
+                <div id="images_container" class="d-flex flex-wrap gap-2">
+                    <th:block th:each="f : ${attachedFiles}">
+                        <img th:if="${f.contentType != null && #strings.startsWith(f.contentType, 'image')}"
+                             th:src="@{/board/files/{fileId}/view(fileId=${f.id})}"
+                             alt="미리보기"
+                             class="img-thumbnail"
+                             style="width: 200px; height: 150px; object-fit: cover;">
+                    </th:block>
+                </div>
+            </div>
         </div>
         <div class="d-flex justify-content-between">
             <div>
@@ -62,6 +74,8 @@
     </div>
 </body>
 
+<script>
 
+</script>
 
 </html>

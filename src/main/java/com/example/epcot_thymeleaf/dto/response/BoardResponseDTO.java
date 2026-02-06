@@ -15,4 +15,5 @@ public class BoardResponseDTO {
   private String username;
   private LocalDateTime createdAt;
 
+
 }

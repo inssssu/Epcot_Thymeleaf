@@ -1,20 +1,23 @@
 package com.example.epcot_thymeleaf.controller;
 
-import com.example.epcot_thymeleaf.dto.response.BoardResponseDTO;
 import com.example.epcot_thymeleaf.entity.BoardEntity;
+import com.example.epcot_thymeleaf.entity.BoardFileEntity;
 import com.example.epcot_thymeleaf.entity.UserEntity;
+import com.example.epcot_thymeleaf.repository.BoardFileRepository;
 import com.example.epcot_thymeleaf.repository.UserRepository;
 import com.example.epcot_thymeleaf.service.BoardFileService;
 import com.example.epcot_thymeleaf.service.BoardService;
 import com.example.epcot_thymeleaf.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -26,10 +29,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.MalformedURLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/board")
@@ -40,6 +42,7 @@ public class BoardController {
   private final UserService userService;
   private final UserRepository userRepository;
   private final BoardFileService boardFileService;
+  private final BoardFileRepository boardFileRepository;
 
   @GetMapping("/list")
   public String boardListPage(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model, Authentication user) {
@@ -72,7 +75,6 @@ public class BoardController {
       @AuthenticationPrincipal UserDetails userDetails,
       Model model
   ) {
-
 
 //    Long loginUserId = (Long) session.getAttribute("loginUserId");
 //    if (loginUserId == null) {
@@ -107,7 +109,7 @@ public class BoardController {
         .updatedAt(LocalDateTime.now())
         .build();
 
-    boardService.write(board, files);
+    boardService.write(board);
     System.out.println("board write");
     boardFileService.uploadFiles(board.getId(), files);
 
@@ -133,7 +135,26 @@ public class BoardController {
 
     model.addAttribute("page", boardPage.getNumber());
 
+//    boardFileService.preview();
+
     return "board/board-detail";
+  }
+
+  @GetMapping("/board/files/{fileId}/view")
+  @ResponseBody
+  public ResponseEntity<Resource> viewImage(@PathVariable Long fileId) {
+    // 1. DB에서 파일 정보 가져오기
+    BoardFileEntity meta = boardFileRepository.findById(fileId)
+        .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다"));
+
+    // 2. 파일 리소스 생성
+    Resource resource = new FileSystemResource(meta.getStoredPath());
+
+    // 3. 응답 생성
+    return ResponseEntity.ok()
+        // 브라우저가 이미지로 인식하도록 Content-Type 설정 (예: image/jpeg)
+        .header(HttpHeaders.CONTENT_TYPE, meta.getContentType())
+        .body(resource);
   }
 
   @PostMapping("/detail/{id}/delete")
@@ -144,11 +165,13 @@ public class BoardController {
   }
 
   @GetMapping("/edit/{id}")
-  public String boardEditPage(@PathVariable Long id, HttpSession httpSession, Model model) {
+  public String boardEditPage(@PathVariable Long id, HttpSession httpSession, Model model) throws MalformedURLException {
     BoardEntity board = boardService.getBoardItem(id);
 
     model.addAttribute("item", board);
     model.addAttribute("attachedFiles", boardFileService.getFiles(id));
+
+//    model.addAttribute("fileId", filePreview(fileId));
 
     return "board/board-write";
   }
@@ -167,7 +190,7 @@ public class BoardController {
     board.setTitle(form.getTitle());
     board.setContent(form.getContent());
     board.setUpdatedAt(LocalDateTime.now());
-    boardService.write(board, files);
+    boardService.write(board);
     boardFileService.uploadFiles(id, files);
 
     return "redirect:/board/detail/" + id;
@@ -178,4 +201,10 @@ public class BoardController {
 
     return boardFileService.download(fileId);
   }
+
+//  @GetMapping("/files/{fileId}/view")
+//  public ResponseEntity<UrlResource> filePreview(@PathVariable Long fileId) throws MalformedURLException {
+//
+//    return boardFileService.preview(fileId);
+//  }
 }

@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,8 @@ import java.util.UUID;
 public class BoardFileService {
 
   private final BoardFileRepository boardFileRepository;
-
+//  private final Path uploadDir = Paths.get("upload");
+//
   @Value("${org.zerock.upload.path}")
   private String uploadDir;
 
@@ -97,5 +99,29 @@ public class BoardFileService {
     } catch (MalformedURLException e) {
       throw new RuntimeException("다운로드 처리 실패", e);
     }
+  }
+
+  public ResponseEntity<UrlResource> preview(Long fileId) throws MalformedURLException {
+    BoardFileEntity file = boardFileRepository.findById(fileId).orElseThrow();
+
+    if (!isImage(file)) {
+      return ResponseEntity.notFound().build();
+    }
+
+    Path path = Paths.get(uploadDir, "board").resolve(file.getStoredName());
+    UrlResource resource = new UrlResource( "file : " + path);
+//    UrlResource resource = new UrlResource("file: " + uploadDir.resolveConstantDesc());
+
+    System.out.println("resource.getFilename() : " + resource.getFilename());
+    System.out.println("file: " + file);
+
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(file.getContentType()))
+        .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+        .body(resource);
+  }
+
+  public boolean isImage(BoardFileEntity file) {
+    return file.getContentType() != null && file.getContentType().startsWith("image");
   }
 }
