@@ -15,72 +15,49 @@
     <div class="card board-card shadow-sm border-8 mt-3">
         <div class="card-body p-4 ">
             <form
+                th:if="*{id == null}"
                 th:object="${item}"
-                th:action="*{id} == null ? @{/board/write} : @{/board/edit/{id}(id=*{id})}"
+                th:action="@{/board/write}"
                 method="post"
                 enctype="multipart/form-data"
             >
                 <div class="mb-3">
-                    <input
-                        type="text"
-                        class="form-control form-control-lg board-input"
-                        placeholder="제목"
-                        th:field="*{title}"
-                    >
+                    <input type="text" class="form-control form-control-lg board-input"
+                           placeholder="제목" th:field="*{title}">
                 </div>
 
                 <div class="mb-4">
-                    <textarea
-                        class="form-control board-textarea "
-                        rows="12"
-                        placeholder="내용"
-                        th:field="*{content}"
-                    ></textarea>
+                    <textarea class="form-control board-textarea" rows="12"
+                              placeholder="내용" th:field="*{content}">내용</textarea>
                 </div>
 
                 <div class="mb-4 d-flex">
                     <!-- 첨부파일명 목록 -->
                     <div class="card board-card flex-grow-1 px-2 pb-2">
-<!--                        <div>첨부파일</div>-->
-
-<!--                        <div th:if="${attachedFiles == null || #lists.isEmpty(attachedFiles)}" id="fileNameText">-->
-<!--                            선택된 파일이 없습니다-->
-<!--                        </div>-->
-                        <ul class="d-flex mb-0" id="attachedFileList" th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
-                            <li class="me-5" th:each="f : ${attachedFiles}" th:text="${f.originalName}">file</li>
-                        </ul>
                         <div class="form-group ">
                             <label for="preview_image"></label>
                             <input type="file" multiple="multiple" class="form-control form-control-user"
                                    name="files" id="preview_image" onchange="setDetailImage(event)">
                         </div>
 
+                        <ul class="d-flex mb-0" id="attachedFileList" th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
+                            <li class="me-5" th:each="f : ${attachedFiles}" th:text="${f.originalName}">file</li>
+                        </ul>
 
-<!--                        <div class="form-group">-->
-<!--                            <input type="file" class="form-control form-control-user"-->
-<!--                                   name="product_image" id="product_image" onchange="setThumbnail(event)">-->
-<!--                        </div>-->
-<!--                        <div id="image_container"></div>-->
-<!--                        <div class="form-group">-->
-<!--                            <input type="file" multiple="multiple" class="form-control form-control-user"-->
-<!--                                   name="product_detail_image" id="product_detail_image" onchange="setDetailImage(event)">-->
-<!--                        </div>-->
+                        <div class="form-group">
+                            <input type="file" class="form-control form-control-user"
+                                   name="product_image" id="product_image" onchange="setThumbnail(event)">
+                        </div>
+                        <div id="image_container"></div>
+                        <div class="form-group">
+                            <input type="file" multiple="multiple" class="form-control form-control-user"
+                                   name="product_detail_image" id="product_detail_image" onchange="setDetailImage(event)">
+                        </div>
 
                         <div id="images_container" class="d-flex flex-wrap mb-2"></div>
 
                         <ul class="mb-0" id="selectedFileList" style="display:none;"></ul>
-
-
                     </div>
-
-                    <!-- 첨부파일 업로드 버튼  -->
-<!--                    <div class="d-flex align-items-start">-->
-<!--                        <label class="btn btn-primary mb-0">-->
-<!--                            파일첨부-->
-<!--                            <input class="form-control" type="file" name="files"-->
-<!--                                   onChange="onFileChange(this)" multiple hidden>-->
-<!--                        </label>-->
-<!--                    </div>-->
                 </div>
 
                 <div class="d-flex justify-content-end gap-3">
@@ -93,66 +70,6 @@
 </body>
 
 <script th:inline="javascript">
-    function onFileChange(input) {
-        // const label = document.getElementById('fileNameText');
-        //
-        // if (input.files && input.files.length > 0) {
-        //     label.textContent = input.files[0].name;
-        // } else {
-        //     label.textContent = '선택된 파일이 없습니다';
-        // }
-
-        const files = input.files;
-
-        const emptyText = document.getElementById('fileNameText');
-        const selectedList = document.getElementById('selectedFileList');
-
-        if (!files || files.length === 0) {
-            if (selectedList) selectedList.style.display = 'none';
-            if (emptyText) emptyText.style.display = 'none';
-            return;
-        }
-
-        if (emptyText) emptyText.style.display = 'none';
-
-        if (selectedList) {
-            selectedList.style.display = '';
-            Array.from(files).forEach(f => {
-                const li = document.createElement('li');
-                li.textContent = f.name;
-                selectedList.appendChild(li);
-            });
-        }
-    }
-
-    function readURLs(e) {
-        var files = e.files;
-        var filsArr = Array.prototype.slice.call(files)
-        document.getElementById("previews").innerHTML = "";
-
-        for (f of fileArr) {
-            imageLoader(f);
-        }
-    }
-
-    function imageLoader(input) {
-        var img_style = 'width: 100px; height: 100px';
-
-        if (input) {
-            var reader = new FileReader();
-            var previews = document.getElementById(previews);
-
-            reader.onload = function (e) {
-                let img = document.createElement('img')
-                img.setAttribute('style', img_style)
-                img.src = e.target.result;
-                previews.appendChild(img);
-            };
-
-            reader.readAsDataURL(input);
-        }
-    }
-
     function setThumbnail(event) {
         var reader = new FileReader();
 
@@ -208,21 +125,6 @@
             };
             reader.readAsDataURL(file);
         });
-
-        // for (var image of event.target.files) {
-        //     var reader = new FileReader();
-        //
-        //     reader.onload = function (event) {
-        //         var img = document.createElement("img");
-        //         img.setAttribute("src", event.target.result);
-        //         img.setAttribute("jfif", event.target.result);
-        //         img.setAttribute("class", "col-lg-6");
-        //         document.querySelector("div#images_container").appendChild(img);
-        //     };
-        //
-        //     console.log(image);
-        //     reader.readAsDataURL(image);
-        // }
     }
 </script>
 

@@ -34,21 +34,23 @@
             </div>
 
             <div th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
-                <ul class="d-flex mb-3" style="list-style: none; padding-left: 0;">
-                    <li th:each="f : ${attachedFiles}" class="me-4">
-                        <i class="bi bi-file-earmark-arrow-down"></i> <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}"
-                                                                         th:text="${f.originalName}" class="text-decoration-none">download</a>
-                    </li>
-                </ul>
-
-                <div id="images_container" class="d-flex flex-wrap gap-2">
-                    <th:block th:each="f : ${attachedFiles}">
-                        <img th:if="${f.contentType != null && #strings.startsWith(f.contentType, 'image')}"
-                             th:src="@{/board/files/{fileId}/view(fileId=${f.id})}"
-                             alt="미리보기"
-                             class="img-thumbnail"
-                             style="width: 200px; height: 150px; object-fit: cover;">
-                    </th:block>
+                <!-- 이미지: 미리보기 + 다운로드 링크 -->
+                <div class="d-flex flex-wrap gap-3 mb-2">
+                    <div th:each="f : ${attachedFiles}" class="border rounded p-2">
+                        <th:block th:if="${f.contentType != null && #strings.startsWith(f.contentType, 'image/')}">
+                            <a th:href="@{/board/files/{fileId}/view(fileId=${f.id})}" target="_blank">
+                                <img th:src="@{/board/files/{fileId}/view(fileId=${f.id})}"
+                                     th:alt="${f.originalName}"
+                                     class="img-thumbnail" style="max-width: 200px; max-height: 200px; object-fit: contain;">
+                            </a>
+                            <div class="small mt-1">
+                                <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}" th:text="${f.originalName}">file</a>
+                            </div>
+                        </th:block>
+                        <th:block th:unless="${f.contentType != null && #strings.startsWith(f.contentType, 'image/')}">
+                            <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}" th:text="${f.originalName}">download</a>
+                        </th:block>
+                    </div>
                 </div>
             </div>
         </div>

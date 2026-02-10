@@ -165,15 +165,16 @@ public class BoardController {
   }
 
   @GetMapping("/edit/{id}")
-  public String boardEditPage(@PathVariable Long id, HttpSession httpSession, Model model) throws MalformedURLException {
+  public String boardEditPage(
+      @PathVariable Long id,
+      HttpSession httpSession,
+      Model model) throws MalformedURLException {
     BoardEntity board = boardService.getBoardItem(id);
 
     model.addAttribute("item", board);
     model.addAttribute("attachedFiles", boardFileService.getFiles(id));
 
-//    model.addAttribute("fileId", filePreview(fileId));
-
-    return "board/board-write";
+    return "board/board-edit";
   }
 
   @PostMapping("/edit/{id}")
@@ -197,14 +198,14 @@ public class BoardController {
   }
 
   @GetMapping("/files/{fileId}/download")
-  public ResponseEntity<UrlResource> fileDownload(@PathVariable Long fileId, Model model) {
+  public ResponseEntity<UrlResource> fileDownload(@PathVariable Long fileId) {
 
     return boardFileService.download(fileId);
   }
 
-//  @GetMapping("/files/{fileId}/view")
-//  public ResponseEntity<UrlResource> filePreview(@PathVariable Long fileId) throws MalformedURLException {
-//
-//    return boardFileService.preview(fileId);
-//  }
+  @GetMapping("/files/{fileId}/view")
+  public ResponseEntity<UrlResource> filePreview(@PathVariable Long fileId) throws MalformedURLException {
+
+    return boardFileService.view(fileId);
+  }
 }

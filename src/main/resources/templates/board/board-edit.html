@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<header>
+    <div th:replace="~{fragment/header :: header}"></div>
+</header>
+<body class="container mt-5">
+<div class="card board-card shadow-sm border-8 mt-3">
+    <div class="card-body p-4">
+
+        <h2>게시글 수정</h2>
+
+        <form
+              th:if="*{id != null}"
+              th:object="${item}"
+              th:action="@{/board/edit/{id}(id=*{id})}"
+              method="post"
+              enctype="multipart/form-data">
+
+            <input type="hidden" th:field="*{id}">
+
+            <div class="mb-3">
+                <input type="text" class="form-control form-control-lg"
+                       th:field="*{title}" placeholder="제목">
+            </div>
+
+            <div class="mb-4">
+                <textarea class="form-control" rows="12"
+                          th:field="*{content}" placeholder="내용"></textarea>
+            </div>
+
+            <div class="card p-3 mb-4">
+                <label class="form-label font-weight-bold">첨부파일 관리</label>
+
+                <div id="existing_files" class="d-flex flex-wrap gap-2 mb-3" th:if="${!#lists.isEmpty(attachedFiles)}">
+                    <div th:each="file : ${attachedFiles}" class="text-center border p-1">
+                        <img th:src="@{/board/files/{fileId}/view(fileId=${file.id})}"
+                             style="width:80px; height:80px; object-fit:cover;" alt="">
+                        <div class="small text-truncate" style="width:80px;" th:text="${file.originalName}">파일명</div>
+                    </div>
+                </div>
+
+                <input type="file" name="files" id="fileInput" multiple
+                       class="form-control" onchange="previewNewImages(event)">
+
+                <div id="new_images_container" class="d-flex flex-wrap gap-2 mt-3"></div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a th:href="@{/board/list}" class="btn btn-secondary">취소</a>
+                <button type="submit" class="btn btn-primary">수정 완료</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewNewImages(event) {
+        const container = document.getElementById('new_images_container');
+        container.innerHTML = ""; // 기존 미리보기 초기화
+
+        const files = event.target.files;
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = "80px";
+                img.style.height = "80px";
+                img.style.objectFit = "cover";
+                img.classList.add("border", "rounded");
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+</script>
+</body>
+</html>

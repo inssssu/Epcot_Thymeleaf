@@ -1,7 +1,9 @@
 package com.example.epcot_thymeleaf.service;
 
+import com.example.epcot_thymeleaf.entity.BoardEntity;
 import com.example.epcot_thymeleaf.entity.BoardFileEntity;
 import com.example.epcot_thymeleaf.repository.BoardFileRepository;
+import com.example.epcot_thymeleaf.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.osgi.resource.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class BoardFileService {
 
   private final BoardFileRepository boardFileRepository;
+  private final BoardRepository boardRepository;
 //  private final Path uploadDir = Paths.get("upload");
 //
   @Value("${org.zerock.upload.path}")
@@ -38,6 +41,9 @@ public class BoardFileService {
     if (files == null || files.isEmpty()) {
       return;
     }
+
+    BoardEntity board = boardRepository.findById(boardId)
+        .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
     try {
       Path dir = Paths.get(uploadDir, "board", String.valueOf(boardId));
@@ -55,7 +61,7 @@ public class BoardFileService {
         Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
 
         BoardFileEntity meta = new BoardFileEntity();
-        meta.setBoardId(boardId);
+        meta.setBoard(board);
         meta.setOriginalName(original);
         meta.setStoredName(stored);
         meta.setStoredPath(target.toString());
@@ -101,27 +107,57 @@ public class BoardFileService {
     }
   }
 
-  public ResponseEntity<UrlResource> preview(Long fileId) throws MalformedURLException {
-    BoardFileEntity file = boardFileRepository.findById(fileId).orElseThrow();
+//  public ResponseEntity<UrlResource> preview(Long fileId) throws MalformedURLException {
+//    BoardFileEntity file = boardFileRepository.findById(fileId).orElseThrow();
+//
+//    if (!isImage(file)) {
+//      return ResponseEntity.notFound().build();
+//    }
+//
+//    Path path = Paths.get(uploadDir, "board").resolve(file.getStoredName());
+//    UrlResource resource = new UrlResource( "file : " + path);
+////    UrlResource resource = new UrlResource("file: " + uploadDir.resolveConstantDesc());
+//
+//    System.out.println("resource.getFilename() : " + resource.getFilename());
+//    System.out.println("file: " + file);
+//
+//    return ResponseEntity.ok()
+//        .contentType(MediaType.parseMediaType(file.getContentType()))
+//        .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+//        .body(resource);
+//  }
+//
+//  public boolean isImage(BoardFileEntity file) {
+//    return file.getContentType() != null && file.getContentType().startsWith("image");
+//  }
 
-    if (!isImage(file)) {
-      return ResponseEntity.notFound().build();
+  /** 이미지 등 브라우저에서 바로 보여줄 때 사용. inline + 실제 Content-Type */
+  public ResponseEntity<UrlResource> view(Long fileId) {
+    BoardFileEntity meta = boardFileRepository.findById(fileId)
+        .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다"));
+
+    try {
+      Path path = Paths.get(meta.getStoredPath());
+      UrlResource resource = new UrlResource(path.toUri());
+
+      if (!resource.exists()) {
+        return ResponseEntity.notFound().build();
+      }
+
+      MediaType mediaType = meta.getContentType() != null && meta.getContentType().startsWith("image/")
+          ? MediaType.parseMediaType(meta.getContentType())
+          : MediaType.APPLICATION_OCTET_STREAM;
+
+      ContentDisposition contentDisposition = ContentDisposition.inline()
+          .filename(meta.getOriginalName(), StandardCharsets.UTF_8)
+          .build();
+
+      return ResponseEntity.ok()
+          .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+          .contentType(mediaType)
+          .body(resource);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("파일 조회 실패", e);
     }
-
-    Path path = Paths.get(uploadDir, "board").resolve(file.getStoredName());
-    UrlResource resource = new UrlResource( "file : " + path);
-//    UrlResource resource = new UrlResource("file: " + uploadDir.resolveConstantDesc());
-
-    System.out.println("resource.getFilename() : " + resource.getFilename());
-    System.out.println("file: " + file);
-
-    return ResponseEntity.ok()
-        .contentType(MediaType.parseMediaType(file.getContentType()))
-        .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
-        .body(resource);
-  }
-
-  public boolean isImage(BoardFileEntity file) {
-    return file.getContentType() != null && file.getContentType().startsWith("image");
   }
 }

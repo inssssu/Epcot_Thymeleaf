@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "board")
@@ -34,4 +35,6 @@ public class BoardEntity {
     @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardFileEntity> attachedFiles;
 }
