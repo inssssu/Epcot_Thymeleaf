@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -168,7 +169,8 @@ public class BoardController {
   public String boardEditPage(
       @PathVariable Long id,
       HttpSession httpSession,
-      Model model) throws MalformedURLException {
+      Model model
+    ) throws MalformedURLException {
     BoardEntity board = boardService.getBoardItem(id);
 
     model.addAttribute("item", board);
@@ -182,7 +184,8 @@ public class BoardController {
       @PathVariable Long id,
       @ModelAttribute("item") BoardEntity form,
       @RequestParam List<MultipartFile> files,
-      HttpSession httpSession) {
+      @RequestParam(required = false) List<Long> deleteFileIds,
+      HttpSession httpSession) throws IOException {
 
     form.setId(id);
 
@@ -193,6 +196,7 @@ public class BoardController {
     board.setUpdatedAt(LocalDateTime.now());
     boardService.write(board);
     boardFileService.uploadFiles(id, files);
+    boardFileService.fileDelete(deleteFileIds);
 
     return "redirect:/board/detail/" + id;
   }

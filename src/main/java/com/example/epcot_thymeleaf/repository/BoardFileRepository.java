@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BoardFileRepository extends JpaRepository<BoardFileEntity, Long> {
 
-  List<BoardFileEntity> findAllByBoardIdOrderByIdDesc(Long boardId);
+  List<BoardFileEntity> findByBoardIdAndIsDeletedFalse(Long boardId);
 
   /* file list 조회
   *   boardId - 게시글 조회 번호

@@ -77,7 +77,21 @@ public class BoardFileService {
   }
 
   public List<BoardFileEntity> getFiles(Long boardId) {
-    return boardFileRepository.findAllByBoardIdOrderByIdDesc(boardId);
+    return boardFileRepository.findByBoardIdAndIsDeletedFalse(boardId);
+  }
+
+  public void fileDelete(
+      List<Long> deleteFileIds
+  ) throws IOException {
+    if (deleteFileIds != null && !deleteFileIds.isEmpty()) {
+      for (Long fileId : deleteFileIds) {
+        BoardFileEntity file = boardFileRepository.findById(fileId).orElse(null);
+
+        if (file != null) {
+          file.setDeleted(true);
+        }
+      }
+    }
   }
 
   public ResponseEntity<UrlResource> download(Long fileId) {

@@ -37,4 +37,6 @@ public class BoardEntity {
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardFileEntity> attachedFiles;
+
+
 }

@@ -30,5 +30,6 @@ public class BoardFileEntity {
   private String contentType;
   private long size;
 
-
+  @Column(nullable = false)
+  private boolean isDeleted;
 }

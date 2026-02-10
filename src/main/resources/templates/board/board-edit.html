@@ -15,12 +15,13 @@
 <div class="my-3">
     <h2>게시글 수정</h2>
 
-    <form
-          th:if="*{id != null}"
+    <form th:if="*{id != null}"
           th:object="${item}"
           th:action="@{/board/edit/{id}(id=*{id})}"
           method="post"
           enctype="multipart/form-data">
+
+        <input type="hidden" id="deleteFileIds" name="deleteFileIds">
 
         <input type="hidden" th:field="*{id}">
 
@@ -37,11 +38,35 @@
         <div class="card p-3 mb-4">
             <label class="form-label font-weight-bold">첨부파일 관리</label>
 
+<!--            <div id="existing_files" class="d-flex flex-wrap gap-2 mb-3" th:if="${!#lists.isEmpty(attachedFiles)}">-->
+<!--                <div th:each="file : ${attachedFiles}" class="text-center border p-1">-->
+<!--                    <img th:src="@{/board/files/{fileId}/view(fileId=${file.id})}"-->
+<!--                         style="width:80px; height:80px; object-fit:cover;" alt="">-->
+<!--                    <div class="small text-truncate" style="width:80px;" th:text="${file.originalName}">파일명</div>-->
+<!--                </div>-->
+<!--            </div>-->
+
             <div id="existing_files" class="d-flex flex-wrap gap-2 mb-3" th:if="${!#lists.isEmpty(attachedFiles)}">
-                <div th:each="file : ${attachedFiles}" class="text-center border p-1">
-                    <img th:src="@{/board/files/{fileId}/view(fileId=${file.id})}"
-                         style="width:80px; height:80px; object-fit:cover;" alt="">
-                    <div class="small text-truncate" style="width:80px;" th:text="${file.originalName}">파일명</div>
+                <div th:each="file : ${attachedFiles}" class="text-center border p-1 position-relative"
+                     th:id="'file-' + ${file.id}"><img th:src="@{/board/files/{fileId}/view(fileId=${file.id})}"
+                     style="width: 80px; height: 80px; object-fit: cover;"   alt="첨부파일">
+
+                    <div class="small text-truncate" style="width: 80px;" th:text="${file.originalName}">파일명</div>
+
+<!--                    <button type="button"-->
+<!--                            class="btn btn-danger btn-sm position-absolute top-0 end-0 py-0 px-1"-->
+<!--                            onclick="deleteExistingFile([[${file.id}]], 'file-' + [[${file.id}]])"-->
+<!--                    >-->
+<!--                        &times;-->
+<!--                    </button>-->
+                    <button type="button"
+                            class="btn btn-danger btn-sm"
+                            th:data-id="${file.id}"
+                            th:data-dom-id="'file-' + ${file.id}"
+                            onclick="deleteExistingFile(this.getAttribute('data-id'), this.getAttribute('data-dom-id'))">
+                        &times;
+                    </button>
+
                 </div>
             </div>
 
@@ -59,6 +84,8 @@
 </div>
 
 <script>
+    let deletedFileIds = [];
+
     function previewNewImages(event) {
         const container = document.getElementById('new_images_container');
         container.innerHTML = ""; // 기존 미리보기 초기화
@@ -77,6 +104,16 @@
             };
             reader.readAsDataURL(file);
         });
+    }
+
+    function deleteExistingFile(fileId, elementId) {
+        document.getElementById(elementId).style.display = 'none';
+
+        deletedFileIds.push(fileId);
+        console.log("fileId : " + fileId);
+        document.getElementById('deleteFileIds').value = deletedFileIds.join(",");
+
+        console.log("삭제할 ID 목록 : " + deletedFileIds);
     }
 </script>
 </body>
