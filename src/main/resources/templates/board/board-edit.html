@@ -12,53 +12,50 @@
     <div th:replace="~{fragment/header :: header}"></div>
 </header>
 <body class="container mt-5">
-<div class="card board-card shadow-sm border-8 mt-3">
-    <div class="card-body p-4">
+<div class="my-3">
+    <h2>게시글 수정</h2>
 
-        <h2>게시글 수정</h2>
+    <form
+          th:if="*{id != null}"
+          th:object="${item}"
+          th:action="@{/board/edit/{id}(id=*{id})}"
+          method="post"
+          enctype="multipart/form-data">
 
-        <form
-              th:if="*{id != null}"
-              th:object="${item}"
-              th:action="@{/board/edit/{id}(id=*{id})}"
-              method="post"
-              enctype="multipart/form-data">
+        <input type="hidden" th:field="*{id}">
 
-            <input type="hidden" th:field="*{id}">
+        <div class="mb-3">
+            <input type="text" class="form-control form-control-lg"
+                   th:field="*{title}" placeholder="제목">
+        </div>
 
-            <div class="mb-3">
-                <input type="text" class="form-control form-control-lg"
-                       th:field="*{title}" placeholder="제목">
-            </div>
+        <div class="mb-4">
+            <textarea class="form-control" rows="12"
+                      th:field="*{content}" placeholder="내용"></textarea>
+        </div>
 
-            <div class="mb-4">
-                <textarea class="form-control" rows="12"
-                          th:field="*{content}" placeholder="내용"></textarea>
-            </div>
+        <div class="card p-3 mb-4">
+            <label class="form-label font-weight-bold">첨부파일 관리</label>
 
-            <div class="card p-3 mb-4">
-                <label class="form-label font-weight-bold">첨부파일 관리</label>
-
-                <div id="existing_files" class="d-flex flex-wrap gap-2 mb-3" th:if="${!#lists.isEmpty(attachedFiles)}">
-                    <div th:each="file : ${attachedFiles}" class="text-center border p-1">
-                        <img th:src="@{/board/files/{fileId}/view(fileId=${file.id})}"
-                             style="width:80px; height:80px; object-fit:cover;" alt="">
-                        <div class="small text-truncate" style="width:80px;" th:text="${file.originalName}">파일명</div>
-                    </div>
+            <div id="existing_files" class="d-flex flex-wrap gap-2 mb-3" th:if="${!#lists.isEmpty(attachedFiles)}">
+                <div th:each="file : ${attachedFiles}" class="text-center border p-1">
+                    <img th:src="@{/board/files/{fileId}/view(fileId=${file.id})}"
+                         style="width:80px; height:80px; object-fit:cover;" alt="">
+                    <div class="small text-truncate" style="width:80px;" th:text="${file.originalName}">파일명</div>
                 </div>
-
-                <input type="file" name="files" id="fileInput" multiple
-                       class="form-control" onchange="previewNewImages(event)">
-
-                <div id="new_images_container" class="d-flex flex-wrap gap-2 mt-3"></div>
             </div>
 
-            <div class="d-flex justify-content-end gap-2">
-                <a th:href="@{/board/list}" class="btn btn-secondary">취소</a>
-                <button type="submit" class="btn btn-primary">수정 완료</button>
-            </div>
-        </form>
-    </div>
+            <input type="file" name="files" id="fileInput" multiple
+                   class="form-control" onchange="previewNewImages(event)">
+
+            <div id="new_images_container" class="d-flex flex-wrap gap-2 mt-3"></div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <a th:href="@{/board/list}" class="btn btn-secondary">취소</a>
+            <button type="submit" class="btn btn-primary">수정 완료</button>
+        </div>
+    </form>
 </div>
 
 <script>

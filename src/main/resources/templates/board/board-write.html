@@ -12,64 +12,53 @@
     <div th:replace="~{fragment/header :: header}"></div>
 </header>
 <body class="container mt-5">
-    <div class="card board-card shadow-sm border-8 mt-3">
-        <div class="card-body p-4 ">
-            <form
-                th:if="*{id == null}"
-                th:object="${item}"
-                th:action="@{/board/write}"
-                method="post"
-                enctype="multipart/form-data"
-            >
-                <div class="mb-3">
-                    <input type="text" class="form-control form-control-lg board-input"
-                           placeholder="제목" th:field="*{title}">
-                </div>
+    <div class="my-3">
+        <form
+            th:object="${item}"
+            th:action="@{/board/write}"
+            method="post"
+            enctype="multipart/form-data"
+        >
+            <div class="mb-3">
+                <input type="text" class="form-control form-control-lg board-input"
+                       placeholder="제목" th:field="*{title}">
+            </div>
 
-                <div class="mb-4">
-                    <textarea class="form-control board-textarea" rows="12"
-                              placeholder="내용" th:field="*{content}">내용</textarea>
-                </div>
+            <div class="mb-4">
+                <textarea class="form-control board-textarea" rows="12"
+                          placeholder="내용" th:field="*{content}">내용</textarea>
+            </div>
 
-                <div class="mb-4 d-flex">
-                    <!-- 첨부파일명 목록 -->
-                    <div class="card board-card flex-grow-1 px-2 pb-2">
-                        <div class="form-group ">
-                            <label for="preview_image"></label>
-                            <input type="file" multiple="multiple" class="form-control form-control-user"
-                                   name="files" id="preview_image" onchange="setDetailImage(event)">
-                        </div>
-
-                        <ul class="d-flex mb-0" id="attachedFileList" th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
-                            <li class="me-5" th:each="f : ${attachedFiles}" th:text="${f.originalName}">file</li>
-                        </ul>
-
-                        <div class="form-group">
-                            <input type="file" class="form-control form-control-user"
-                                   name="product_image" id="product_image" onchange="setThumbnail(event)">
-                        </div>
-                        <div id="image_container"></div>
-                        <div class="form-group">
-                            <input type="file" multiple="multiple" class="form-control form-control-user"
-                                   name="product_detail_image" id="product_detail_image" onchange="setDetailImage(event)">
-                        </div>
-
-                        <div id="images_container" class="d-flex flex-wrap mb-2"></div>
-
-                        <ul class="mb-0" id="selectedFileList" style="display:none;"></ul>
+            <div class="mb-4 d-flex">
+                <!-- 첨부파일명 목록 -->
+                <div class="card board-card flex-grow-1 px-2 pb-2">
+                    <div class="form-group ">
+                        <label for="preview_image" class="form-label">첨부파일</label>
+                        <input type="file" multiple="multiple" class="form-control"
+                               name="files" id="preview_image" onchange="addFiles(event)">
                     </div>
-                </div>
 
-                <div class="d-flex justify-content-end gap-3">
-                    <a class="btn btn-danger" th:href="@{/board/list}">취소</a>
-                    <button type="submit" class="btn btn-success">확인</button>
+                    <ul class="d-flex mb-0" id="attachedFileList" th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
+                        <li class="me-5" th:each="f : ${attachedFiles}" th:text="${f.originalName}">file</li>
+                    </ul>
+
+                    <div id="images_container" class="d-flex flex-wrap mb-2 gap-2"></div>
+
+                    <ul class="mb-0" id="selectedFileList" style="display:none;"></ul>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3">
+                <a class="btn btn-danger" th:href="@{/board/list}">취소</a>
+                <button type="submit" class="btn btn-success">확인</button>
+            </div>
+        </form>
     </div>
 </body>
 
 <script th:inline="javascript">
+    const dataTransfer = new DataTransfer();
+
     function setThumbnail(event) {
         var reader = new FileReader();
 
@@ -125,6 +114,81 @@
             };
             reader.readAsDataURL(file);
         });
+    }
+
+    function addFiles(event) {
+        const files = event.target.files;
+        const container = document.getElementById('images_container');
+
+        if (files != null && files.length > 0) {
+
+            for (let i = 0; i < files.length; i++) {
+                dataTransfer.items.add(files[i]);
+            }
+
+            document.getElementById('preview_image').files = dataTransfer.files;
+
+            renderImages();
+        }
+    }
+
+    function renderImages() {
+        const container = document.getElementById('images_container');
+        container.innerHTML = '';
+
+        for (let i = 0; i < dataTransfer.files.length; i++) {
+            const file = dataTransfer.files[i];
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'position-relative d-inline-block me-2 mt-3';
+            wrapper.style.width = '150px';
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'img-thumbnail w-100';
+                img.style.height = '150px';
+                img.style.objectFit = 'cover';
+
+                const btn = document.createElement('btn');
+                btn.type = 'button';
+                btn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0 translate-middle rounded-circle'
+                btn.style.padding = '0.2rem 0.4rem';
+                btn.innerHTML = '&times;';
+
+                btn.dataset.index = i;
+                btn.onclick = function () {
+                    removeFile(this.dataset.index);
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(btn);
+                container.appendChild(wrapper);
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeFile(index) {
+        const newDataTransfer = new DataTransfer();
+        const files = dataTransfer.files;
+
+        for (let i = 0; i < files.length; i++) {
+            if (i != index) {
+                newDataTransfer.items.add(files[i]);
+            }
+        }
+
+        dataTransfer.items.clear();
+        for (let i = 0; i < newDataTransfer.files.length; i++) {
+            dataTransfer.items.add(newDataTransfer.files[i]);
+        }
+
+        document.getElementById("preview_image").files = dataTransfer.files;
+
+        renderImages();
     }
 </script>
 
