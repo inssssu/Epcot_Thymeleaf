@@ -21,17 +21,21 @@ public class SecurityConfig {
         System.out.println("password encode");
         System.out.println(new BCryptPasswordEncoder().encode("1234"));
 
-        http.authorizeHttpRequests((auth) -> auth
-            .requestMatchers(
+      http
+//          .csrf((csrf) -> csrf.disable())
+          .authorizeHttpRequests((auth) -> auth
+
+          .requestMatchers(
               "/",
+              "/join",
               "/auth/**",
               "/board/list",
               "/board/detail/**",
               "/error"
-            ).permitAll()
-            .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-            .anyRequest().authenticated()
-        );
+          ).permitAll()
+          .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+          .anyRequest().authenticated()
+      );
 
         http.formLogin((auth) -> auth
 //              .loginPage("/login")    // 사용자 커스텀 로그인폼을 사용하겠다 할 때 적용
