@@ -125,7 +125,7 @@ public class BoardController {
       Model model
     ) {
     if (user != null) {
-      model.addAttribute("loginId", user.getName());
+      model.addAttribute("loginId", user);
     }
 
     BoardEntity board = boardService.getBoardItem(id);

@@ -76,6 +76,8 @@ public class AuthController {
     Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(pageable);
     Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
 
+    List<BoardEntity> myBoards = mypageService.getMyBoards(user.getId());
+
     model.addAttribute("user", user);
     model.addAttribute("myBoardsPage", myBoardsPage);
 //    model.addAttribute("navPage", boardPage.getNumber());

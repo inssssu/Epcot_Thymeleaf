@@ -58,7 +58,10 @@
             <div>
                 <a th:href="@{/board/list(page=${page + 1})}" class="btn btn-success mt-3">목록</a>
             </div>
-            <div class="d-flex justify-content-end mt-3 gap-3">
+            <div class="d-flex justify-content-end mt-3 gap-3"
+                 sec:authorize="isAuthenticated()"
+                 th:if="${item.author != null && #authentication.name == item.author.username}"
+            >
 
                 <a th:href="@{/board/edit/{id}(id=${item.id})}" class="btn btn-warning">수정</a>
 
