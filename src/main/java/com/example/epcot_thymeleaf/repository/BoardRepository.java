@@ -1,6 +1,7 @@
 package com.example.epcot_thymeleaf.repository;
 
 import com.example.epcot_thymeleaf.entity.BoardEntity;
+import com.example.epcot_thymeleaf.entity.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,6 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
   @Query("select b from BoardEntity b where b.author.id = :userId order by b.createdAt desc")
   List<BoardEntity> findAllByIdOrderById(@Param("userId") Long userId);
 
-  Page<BoardEntity> findByAuthor_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+  List<BoardEntity> findAllByAuthorOrderByIdDesc(UserEntity Author);
 
 }

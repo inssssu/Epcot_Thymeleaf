@@ -25,8 +25,8 @@ public class MypageService {
         .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다." + loginId));
   }
 
-  public List<BoardEntity> getMyBoards(Long userId) {
-    return boardRepository.findAllByIdOrderById(userId);
+  public List<BoardEntity> getMyBoards(UserEntity author) {
+    return boardRepository.findAllByAuthorOrderByIdDesc(author);
   }
 
   public Page<BoardEntity> getMyBoardsPage(Pageable pageable) {

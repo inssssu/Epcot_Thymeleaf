@@ -35,20 +35,20 @@
                         </div>
                     </div>
                     <div class="card p-3">
-                        <div th:if="${myBoardsPage == null || #lists.isEmpty(myBoardsPage)}" class="text-secondary">
+                        <div th:if="${myBoards == null || myBoards.isEmpty()}" class="text-secondary">
                             작성한 게시글이 없습니다.
                         </div>
                         <div class="card-body" style="width: 45rem">
                             활동내용 리스트
-                            <ul class="list-group list-group-flush" th:if="${myBoardsPage != null && !#lists.isEmpty(myBoardsPage)}">
+                            <ul class="list-group list-group-flush" th:if="${myBoards != null && !myBoards.isEmpty()}">
                                 <li class="list-group-item d-flex justify-content-between align-items-center"
-                                    th:each="b : ${myBoardsPage}">
+                                    th:each="b : ${myBoards}">
                                     <div class="text-truncate" style="max-width: 75%;">
                                         <a th:href="@{/board/detail/{id}(id=${b.id})}"
                                            th:text="${b.title}" class="text-decoration-none link-dark"
                                         >제목</a>
                                     </div>
-                                    <small class="text-secondary" th:text="${#temporals.format(b.createdAt, 'yyyy-MM-dd')}">2026-01-014</small>
+                                    <small class="text-secondary" th:text="${#temporals.format(b.createdAt, 'yyyy-MM-dd')}">2026-01-01y=</small>
                                 </li>
                             </ul>
 
