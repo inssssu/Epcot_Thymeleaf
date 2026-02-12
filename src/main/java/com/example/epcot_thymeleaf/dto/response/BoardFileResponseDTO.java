@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class BoardFileResponse {
+public class BoardFileResponseDTO {
 
   private Long id;
   private Long boardId;

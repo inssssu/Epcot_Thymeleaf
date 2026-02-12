@@ -1,5 +1,6 @@
 package com.example.epcot_thymeleaf.controller;
 
+import com.example.epcot_thymeleaf.dto.request.UserEditDTO;
 import com.example.epcot_thymeleaf.dto.request.UserRequestDTO;
 import com.example.epcot_thymeleaf.entity.BoardEntity;
 import com.example.epcot_thymeleaf.entity.UserEntity;
@@ -17,10 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -73,16 +72,32 @@ public class AuthController {
     String loginId = authentication.getName();
 
     UserEntity user = mypageService.getUserByLoginId(loginId);
+
+
     Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(pageable);
     Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
-
-    List<BoardEntity> myBoards = mypageService.getMyBoards(user.getId());
+    List<BoardEntity> myBoards = mypageService.getMyBoards(user);
 
     model.addAttribute("user", user);
     model.addAttribute("myBoardsPage", myBoardsPage);
-//    model.addAttribute("navPage", boardPage.getNumber());
+    model.addAttribute("myBoards", myBoards);
     model.addAttribute("page", boardPage.getNumber());
 
     return "auth/mypage";
+  }
+
+  @PostMapping("/mypage/edit")
+  public String editUserInfo(@ModelAttribute UserEditDTO editDTO, Authentication authentication, RedirectAttributes redirectAttributes) {
+
+    String loginId = authentication.getName();
+
+    try {
+      mypageService.editUserInfo(loginId, editDTO);
+      redirectAttributes.addFlashAttribute("message", "수정되었습니다");
+    } catch (IllegalArgumentException e) {
+      redirectAttributes.addFlashAttribute("message", e.getMessage());
+    }
+
+    return "redirect:/mypage";
   }
 }
