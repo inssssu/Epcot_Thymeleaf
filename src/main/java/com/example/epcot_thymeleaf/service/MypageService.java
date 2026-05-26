@@ -1,15 +1,13 @@
 package com.example.epcot_thymeleaf.service;
 
-import com.example.epcot_thymeleaf.dto.request.UserEditDTO;
+import com.example.epcot_thymeleaf.dto.request.ReqUserEditDto;
 import com.example.epcot_thymeleaf.entity.BoardEntity;
 import com.example.epcot_thymeleaf.entity.UserEntity;
 import com.example.epcot_thymeleaf.repository.BoardRepository;
 import com.example.epcot_thymeleaf.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,23 +31,27 @@ public class MypageService {
     return boardRepository.findAllByAuthorOrderByIdDesc(author);
   }
 
-  public Page<BoardEntity> getMyBoardsPage(Pageable pageable) {
+  public Page<BoardEntity> getMyBoardsPage(Long userId, Pageable pageable) {
 
-    return boardRepository.findAll(pageable);
+    return boardRepository.findAllByIdOrderById(userId, pageable);
   }
 
   @Transactional
-  public void editUserInfo(String currentLoginIdValue, UserEditDTO userEditDTO) {
-    UserEntity user = userRepository.findByUsername(currentLoginIdValue)
+  public void editUserInfo(String loginId, ReqUserEditDto userEditDTO) {
+    UserEntity user = userRepository.findByUsername(loginId)
         .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
 
-    if (!userEditDTO.getPassword().equals(userEditDTO.getPasswordCheck())) {
+    String newPassword = userEditDTO.getNewPassword();
+    String newPasswordCheck = userEditDTO.getNewPasswordCheck();
+
+    if ((newPassword == null || newPassword.isBlank()) && (newPasswordCheck == null || newPasswordCheck.isBlank())) {
+      return;
+    }
+
+    if (newPassword == null || !newPassword.equals(newPasswordCheck)) {
       throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
     }
 
-    if (userEditDTO.getPassword() != null && !userEditDTO.getPassword().isBlank()) {
-      user.setPassword(passwordEncoder.encode(userEditDTO.getPassword()));
-    }
-
+    user.setPassword(passwordEncoder.encode(newPassword));
   }
 }

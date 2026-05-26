@@ -3,7 +3,7 @@ package com.example.epcot_thymeleaf.dto.response;
 import lombok.Data;
 
 @Data
-public class UserResponseDTO {
+public class RespUserDto {
 
   private String username;
 

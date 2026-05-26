@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>회원탈퇴 검토 첫번째 페이지</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between">
+                    <h5 class="mb-0">회원탈퇴 검토 - 1 단계 사유확인</h5>
+                    <span class="badge bg-light text-primary">STEP 01</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">신청 사용자명</label>
+                            <p class="form-control-plaintext" th:text="${user.username}">test_user</p>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">신청 일시</label>
+                            <p class="form-control-plaintext" th:text="${#temporals.format(user.withdrawalRequestedAt, 'yyyy-MM-dd HH:mm')}">2026-04-14 10:00</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-danger">사용자 탈퇴 신청 사유</label>
+                        <div class="p-3 bg-light border rounded">
+                            <p class="mb-0" th:text="${user.withdrawalReason}">사용자가 작성한 탈퇴 사유</p>
+                            <!-- th:text="${user.withdrawalReason}" 사용자가 작성한 탈퇴 사유 칼럼 추가 시 작성 -->
+                        </div>
+                    </div>
+
+                    <form th:action="@{/admin/withdrawal/first/process}" method="post">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+
+                        <input type="hidden" name="withdrawalReason" th:value="${user.withdrawalReason}">
+
+                        <div class="mb-4">
+                            <label for="adminMemo" class="form-label fw-bold">관리자 검토 메모 1단계</label>
+                            <textarea class="form-control" id="adminMemo" name="adminMemo" rows="10" style="resize: none;"
+                                      placeholder="사유의 타당성이나 초기 검토 의견을 기록하세요"></textarea>
+                            <div class="form-text mt-2">이 메모는 2단계 검토 관리자에게 전달됩니다</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/admin/users}" class="btn btn-secondary">목록으로</a>
+                            <div class="d-flex gap-2">
+                                <div th:replace="~{fragment/withdrawal-reject :: reject-button(${user.id})}">반려</div>
+                                <button type="submit" class="btn btn-primary">승인 및 이동</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

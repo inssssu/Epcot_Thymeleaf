@@ -14,56 +14,61 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        log.info("---------- configure ---------------");
-        System.out.println("password encode");
-        System.out.println(new BCryptPasswordEncoder().encode("1234"));
+    log.info("---------- configure ---------------");
+    System.out.println("password encode");
+    System.out.println(new BCryptPasswordEncoder().encode("1234"));
 
-      http
-//          .csrf((csrf) -> csrf.disable())
-          .authorizeHttpRequests((auth) -> auth
 
-          .requestMatchers(
-              "/",
-              "/join",
-              "/auth/**",
-              "/board/list",
-              "/board/detail/**",
-              "/error"
-          ).permitAll()
-          .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-          .anyRequest().authenticated()
-      );
+    http
+      .csrf((csrf) -> csrf.disable())
+      .authorizeHttpRequests((auth) -> auth
 
-        http.formLogin((auth) -> auth
+        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+        .requestMatchers("/admin/log/**").hasAuthority("master_admin")
+        .requestMatchers("/admin/**").hasAnyAuthority("master_admin", "admin")
+        .requestMatchers("/user/**").hasAnyAuthority("user", "admin")
+        .requestMatchers(
+            "/",
+            "/join",
+            "/auth/**",
+            "/board/list",
+            "/board/detail/**",
+            "/board/files/**",
+            "/error"
+      ).permitAll()
+      .anyRequest().authenticated()
+    );
+
+    http.formLogin((auth) -> auth
 //              .loginPage("/login")    // 사용자 커스텀 로그인폼을 사용하겠다 할 때 적용
-              .loginProcessingUrl("/login")
-              .usernameParameter("username")
-              .passwordParameter("password")
-              .defaultSuccessUrl("/board/list", true)
-              .failureUrl("/login?error")
-              .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/board/list")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-        );
+        .loginProcessingUrl("/login")
+        .usernameParameter("username")
+        .passwordParameter("password")
+        .defaultSuccessUrl("/board/list", true)
+        .failureUrl("/login?error")
+        .permitAll()
+      )
+      .logout(logout -> logout
+          .logoutUrl("/logout")
+          .logoutSuccessUrl("/board/list")
+          .invalidateHttpSession(true)
+          .deleteCookies("JSESSIONID")
+    );
 
-
+//    http.exceptionHandling(conf -> conf.accessDeniedPage("/error/403"));
 //                .formLogin()        // success handler, fail handler 설정
-        // sha-512 : 암호화만 되는 복호화 되지 않음.
+      // sha-512 : 암호화만 되는 복호화 되지 않음.
 
-        return http.build();
-    }
+    return http.build();
+  }
 
 
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+  @Bean
+  public BCryptPasswordEncoder bCryptPasswordEncoder() {
 
-        return new BCryptPasswordEncoder();
-    }
+    return new BCryptPasswordEncoder();
+  }
 }

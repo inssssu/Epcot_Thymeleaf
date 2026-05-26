@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<body class="bg-light">
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        <div class="card p-5 shadow-sm text-center" style="max-width: 500px;">
+            <h2 class="text-danger mb-4">탈퇴 완료 계정</h2>
+            <p>사용자님의 계정은 탈퇴 처리가 완료된 계정입니다.</p>
+            <div>
+                <a th:href="@{/logout}" class="btn btn-outline-secondary">로그아웃</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

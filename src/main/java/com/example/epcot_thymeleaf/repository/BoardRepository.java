@@ -16,10 +16,11 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
   Page<BoardEntity> findAll(Pageable pageable);
 
+
   Page<BoardEntity> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
 
-  @Query("select b from BoardEntity b where b.author.id = :userId order by b.createdAt desc")
-  List<BoardEntity> findAllByIdOrderById(@Param("userId") Long userId);
+  @Query("select b from BoardEntity b where b.author.id = :userId order by b.createdAt desc") //
+  Page<BoardEntity> findAllByIdOrderById(@Param("userId") Long userId, Pageable pageable);
 
   List<BoardEntity> findAllByAuthorOrderByIdDesc(UserEntity author);
 

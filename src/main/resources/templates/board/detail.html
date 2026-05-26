@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>board detail</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<body class="container mt-5">
+    <header>
+        <div th:replace="~{fragment/header :: header}"></div>
+    </header>
+    <div class="container-4 my-3">
+        <div class="card card-header d-flex justify-content-between align-items-start mt-3">
+            <h2 class="text-start" th:text="${item.title}">제목</h2>
+            <div class="">
+                <div class="" th:text="'작성자 : ' + ${item.author.username}">
+                    작성자
+                </div>
+                <div class="" th:text="'작성일 : ' + ${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}">
+                    작성일
+                </div>
+            </div>
+        </div>
+        <div class="card card-body mt-3" style="height: 350px; white-space: pre-wrap;" th:text="${item.content}">
+            게시글 내용
+        </div>
+
+        <div class="card card-body mt-3 p-2">
+            <div th:if="${attachedFiles == null || #lists.isEmpty(attachedFiles)}">
+                첨부파일이 없습니다
+            </div>
+
+            <div th:if="${attachedFiles != null && !#lists.isEmpty(attachedFiles)}">
+                <!-- 이미지: 미리보기 + 다운로드 링크 -->
+                <div class="d-flex flex-wrap gap-3 mb-2">
+                    <div th:each="f : ${attachedFiles}" class="border rounded p-2">
+                        <th:block th:if="${f.contentType != null && #strings.startsWith(f.contentType, 'image/')}">
+                            <a th:href="@{/board/files/{fileId}/view(fileId=${f.id})}" target="_blank">
+                                <img th:src="@{/board/files/{fileId}/view(fileId=${f.id})}"
+                                     th:alt="${f.originalName}"
+                                     class="img-thumbnail" style="max-width: 200px; max-height: 200px; object-fit: contain;">
+                            </a>
+                            <div class="small mt-1">
+                                <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}" th:text="${f.originalName}">file</a>
+                            </div>
+                        </th:block>
+                        <th:block th:unless="${f.contentType != null && #strings.startsWith(f.contentType, 'image/')}">
+                            <a th:href="@{/board/files/{fileId}/download(fileId=${f.id})}" th:text="${f.originalName}">download</a>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+            <div>
+                <a th:href="@{/board/list(page=${page + 1})}" class="btn btn-success mt-3">목록</a>
+            </div>
+
+            <div>
+                <button class="btn btn-outline-primary mt-3">다음/이전 게시글 버튼 구역</button>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3 gap-3"
+                 sec:authorize="isAuthenticated()"
+                 th:if="${item.author != null && #authentication.name == item.author.username}"
+            >
+
+                <a th:href="@{/board/edit/{id}(id=${item.id})}" class="btn btn-warning">수정</a>
+
+                <form th:action="@{/board/detail/{id}/delete(id=${item.id})}" method="post"
+                      onsubmit="return confirm('삭제하시겠습니까?')"
+                      class="m-0"
+                >
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                    />
+                    <button type="submit" class="btn btn-danger">삭제</button>
+
+                </form>
+            </div>
+
+        </div>
+
+        <div class="comment-list">
+            <h4 class="mb-4 mt-2">Comments</h4>
+
+            <div class="card mb-4" sec:authorize="isAuthenticated()">
+                <div class="card-body">
+                    <form th:action="@{/comment/write}" method="post">
+                        <input type="hidden" name="postId" th:value="${item.id}">
+                        <div class="mb-3">
+                            <textarea name="content" class="form-control" rows="3" placeholder="댓글을 입력해 주세요" required style="resize: none; height: 150px;"></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary px-4">댓글 등록</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-light border text-center mb-4" sec:authorize="isAnonymous()">
+                댓글을 작성하려면 <a th:href="@{/login}" class="text-primary fw-bold">로그인</a>이 필요합니다
+            </div>
+
+            <div th:if="${#lists.isEmpty(comments)}" class="text-center text-muted my-5">
+                첫 번째 댓글을 남겨보세요
+            </div>
+
+            <div th:each="comment : ${comments}" class="comment-item mb-4 border-bottom pb-3">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="fw-bold me-2" th:text="${comment.user.username}">작성자</span>
+                        <small class="text-muted" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</small>
+                    </div>
+
+                    <div th:if="${#authentication.name == comment.user.username}" th:id="|action-buttons-${comment.id}|">
+                        <button class="btn btn-sm btn-outline-primary" th:onclick="|showEditForm(${comment.id})|">수정</button>
+                        <form th:action="@{/comment/delete/{id}(id=${comment.id})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:id="|comment-text-${comment.id}|" class="comment-content mb-2 px-2" style="white-space: pre-wrap" th:text="${comment.content}">내용</div>
+
+                <div th:id="|edit-area-${comment.id}|" class="card mb-3 d-none border-primary">
+                    <div class="card-body">
+                        <form th:action="@{/comment/edit/{id}(id=${comment.id})}" method="post" th:onsubmit="|return validateForm(${comment.id})|">
+                            <div class="mb-3">
+                                <textarea th:id="|edit-input-${comment.id}|" name="content" class="form-control"
+                                          rows="3" required style="resize: none; height: 150px;"
+                                          th:text="${comment.content}"></textarea>
+                            </div>
+                            <div class="text-end gap-2 d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary px-4" th:onclick="|hideEditForm(${comment.id})|">취소</button>
+                                <button type="submit" class="btn btn-success px-4">완료</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <button sec:authorize="isAuthenticated()" class="btn btn-sm btn-link text-decoration-none p-0 text-secondary"
+                                th:onclick="|toggleReplyForm(${comment.id})|">
+                        답글
+                    </button>
+                </div>
+
+                <div th:id="|reply-form-${comment.id}|" class="ms-5 mb-3 d-none">
+                    <div class="card bg-light">
+                        <div class="card-body p-3">
+                            <form th:action="@{/comment/write}" method="post">
+                                <input type="hidden" name="postId" th:value="${item.id}">
+                                <input type="hidden" name="parentId" th:value="${comment.id}">
+                                <div class="mb-2">
+                                    <textarea name="content" class="form-control" rows="5"
+                                              placeholder="답글을 입력하세요" required style="resize: none;"></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-sm btn-light border me-1" th:onclick="|toggleReplyForm(${comment.id})|">취소</button>
+                                    <button type="submit" class="btn btn-sm btn-primary px-3">등록</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:each="child : ${comment.children}" class="ms-5 bg-light p-3 rounded mb-2 shadow-sm border-start border-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div>
+                            <span class="badge bg-secondary me-2">답글</span>
+                            <span class="fw-bold small me-2" th:text="${child.user.username}">작성자</span>
+                            <small class="text-muted" style="font-size: 0.75rem;" th:text="${#temporals.format(child.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</small>
+                        </div>
+                        <div th:if="${#authentication.name == child.user.username}" th:id="|action-buttons-${child.id}|">
+                            <button class="btn btn-sm btn-outline-primary" style="font-size: 0.8rem;" th:onclick="|showEditForm(${child.id})|">수정</button>
+                            <form th:action="@{/comment/delete/{id}(id=${child.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 0.8rem;" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div th:id="|comment-text-${child.id}|" class="small" style="white-space: pre-wrap" th:text="${child.content}">내용</div>
+
+                    <div th:id="|edit-area-${child.id}|" class="card mt-2 d-none">
+                        <div class="card-body p-2">
+                            <form th:action="@{/comment/edit/{id}(id=${child.id})}" method="post" th:onsubmit="|return validateForm(${child.id})|">
+                            <textarea th:id="|edit-input-${child.id}|" name="content" class="form-control form-control-sm mb-2"
+                                      rows="5" style="resize: none;" th:text="${child.content}"></textarea>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-sm btn-light border" th:onclick="|hideEditForm(${child.id})|">취소</button>
+                                    <button type="submit" class="btn btn-sm btn-success">완료</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    function toggleReplyForm(commentId) {
+        const form = document.getElementById(`reply-form-${commentId}`);
+        if (form) {
+            form.classList.toggle('d-none');
+
+            if (!form.classList.contains('d-none')) {
+                form.querySelector('textarea').focus();
+            }
+        }
+    }
+
+    function showEditForm(id) {
+        document.getElementById(`comment-text-${id}`).classList.add('d-none');
+        document.getElementById(`action-buttons-${id}`).classList.add('d-none');
+        document.getElementById(`edit-area-${id}`).classList.remove('d-none');
+
+        const input = document.getElementById(`edit-input-${id}`);
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+    }
+
+    function hideEditForm(id) {
+        document.getElementById(`comment-text-${id}`).classList.remove('d-none');
+        document.getElementById(`action-buttons-${id}`).classList.remove('d-none');
+        document.getElementById(`edit-area-${id}`).classList.add('d-none');
+    }
+
+    function validateForm(id) {
+        const content = document.getElementById(`edit-input-${id}`).value;
+
+        if (!content || content.trim() === "") {
+            alert("댓글 내용을 입력해 주세요");
+            return false;
+        }
+        return true;
+    }
+
+</script>
+
+</html>

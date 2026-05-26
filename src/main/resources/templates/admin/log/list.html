@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Log List</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<body>
+
+<!-- 로그 테이블 카드 -->
+<div class="log-container p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+            <tr>
+                <th class="text-center">ID</th>
+                <th>발생 일시</th>
+                <th>관리자 계정</th>
+                <th>수행 액션</th>
+                <th>대상 사용자</th>
+                <th>상세 메모</th>
+                <th class="text-center">접속 IP</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${logs}">
+                <td class="text-center text-muted" th:text="${log.id}">1</td>
+                <td th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">2026-05-06 09:50</td>
+                <td>
+                    <span class="fw-bold"
+                          th:text="${log.admin != null ? log.admin.username : '탈퇴한 관리자'}">
+                        admin_master
+                    </span>
+                </td>
+                <td>
+                    <!-- 액션 타입에 따른 뱃지 색상 분기 (Thymeleaf) -->
+                    <span class="badge badge-action rounded-pill"
+                          th:classappend="${log.action.contains('APPROVE') ? 'bg-success' : (log.action.contains('REJECT') ? 'bg-danger' : 'bg-primary')}"
+                          th:text="${log.action}">
+                        STEP_3_FINAL
+                    </span>
+                </td>
+                <td>
+                    <i class="bi bi-person me-1"></i>
+                    <span th:text="${log.targetUser.username}">user_test</span>
+                </td>
+                <td>
+                    <div class="details-text" th:text="${log.details}" th:title="${log.details}">
+                        탈퇴 최종 승인 처리 및 계정 비활성화 완료
+                    </div>
+                </td>
+                <td class="text-center small text-muted">
+                    <code th:text="${log.ipAddress}">192.168.0.1</code>
+                </td>
+            </tr>
+            <!-- 데이터가 없을 경우 -->
+            <tr th:if="${#lists.isEmpty(logs)}">
+                <td colspan="7" class="text-center py-5 text-muted">기록된 로그가 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <a th:href="@{/}" class="btn btn-outline-secondary">메인</a>
+    </div>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

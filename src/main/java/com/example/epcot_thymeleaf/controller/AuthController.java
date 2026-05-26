@@ -1,13 +1,16 @@
 package com.example.epcot_thymeleaf.controller;
 
-import com.example.epcot_thymeleaf.dto.request.UserEditDTO;
-import com.example.epcot_thymeleaf.dto.request.UserRequestDTO;
+import com.example.epcot_thymeleaf.dto.request.ReqUserEditDto;
+import com.example.epcot_thymeleaf.dto.request.ReqUserDto;
+import com.example.epcot_thymeleaf.dto.request.ReqWithdrawalDto;
 import com.example.epcot_thymeleaf.entity.BoardEntity;
 import com.example.epcot_thymeleaf.entity.UserEntity;
 import com.example.epcot_thymeleaf.service.BoardService;
 import com.example.epcot_thymeleaf.service.MypageService;
 import com.example.epcot_thymeleaf.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,7 +18,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
@@ -32,12 +35,14 @@ public class AuthController {
   private final BoardService boardService;
 
   @GetMapping("/login")
-  public String login(Authentication authentication, Model model) {
+  public String login(Authentication authentication, Model model, HttpSession session) {
 
     if (authentication != null
       && authentication.isAuthenticated()
       && !(authentication instanceof AnonymousAuthenticationToken)
     ) {
+      log.info("session >>>> " + session);
+      System.out.println("Username is not null : " + authentication.getName());
       System.out.println("Username is not null : " + authentication.getName());
       model.addAttribute("loginId", authentication.getName());
 
@@ -50,7 +55,7 @@ public class AuthController {
   }
 
   @PostMapping("/join")
-  public ResponseEntity<String> join(@RequestBody UserRequestDTO dto) {
+  public ResponseEntity<String> join(@RequestBody ReqUserDto dto) {
     userService.join(dto);
 
     return ResponseEntity.ok("회원가입 완료");
@@ -70,34 +75,74 @@ public class AuthController {
       Model model) {
 
     String loginId = authentication.getName();
+    log.info("mypage loginId>>>> " + loginId);
 
     UserEntity user = mypageService.getUserByLoginId(loginId);
 
 
-    Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(pageable);
-    Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
+    Page<BoardEntity> myBoardsPage = mypageService.getMyBoardsPage(user.getId(), pageable);
+//    Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
     List<BoardEntity> myBoards = mypageService.getMyBoards(user);
 
     model.addAttribute("user", user);
     model.addAttribute("myBoardsPage", myBoardsPage);
     model.addAttribute("myBoards", myBoards);
-    model.addAttribute("page", boardPage.getNumber());
+//    model.addAttribute("page", boardPage.getNumber());
 
     return "auth/mypage";
   }
 
   @PostMapping("/mypage/edit")
-  public String editUserInfo(@ModelAttribute UserEditDTO editDTO, Authentication authentication, RedirectAttributes redirectAttributes) {
+  public String editUserInfo(@ModelAttribute ReqUserEditDto userEditDto, Authentication authentication, RedirectAttributes redirectAttributes) {
 
     String loginId = authentication.getName();
 
     try {
-      mypageService.editUserInfo(loginId, editDTO);
+      mypageService.editUserInfo(loginId, userEditDto);
       redirectAttributes.addFlashAttribute("message", "수정되었습니다");
+
     } catch (IllegalArgumentException e) {
-      redirectAttributes.addFlashAttribute("message", e.getMessage());
+      redirectAttributes.addFlashAttribute("error", e.getMessage());
     }
 
     return "redirect:/mypage";
   }
+
+  // 사용자 회원 탈퇴 신청
+  @PostMapping("/user/withdraw")
+  public String requestWithdrawal(@RequestParam("userId") Long userId, ReqWithdrawalDto withdrawalDto) {
+    userService.requestWithdrawal(userId, withdrawalDto);
+
+    return "redirect:/mypage";
+  }
+
+  // 사용자 회원 탈퇴 신청 취소
+  @PostMapping("/user/withdraw/cancel")
+  public String cancelWithdrawal(@RequestParam("userId") Long userId) {
+    userService.cancelWithdrawal(userId);
+
+    return "redirect:/mypage";
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

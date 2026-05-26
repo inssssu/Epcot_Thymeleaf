@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="reject-button(userId)">
+    <button type="button" class="btn btn-warning"
+            th:onclick="|handleReject('${userId}')|">
+        반려
+    </button>
+
+    <script th:inline="javascript">
+        // 중복 정의 방지
+        if (typeof handleReject !== 'function') {
+            function handleReject(userId) {
+                const reason = prompt("사용자에게 전달할 반려 사유를 입력해주세요");
+                const adminMemo = document.getElementById('adminMemo');
+
+                if (reason === null) return;
+
+                if (reason.trim() === "") {
+                    alert("반려 사유는 필수 입력 사항입니다");
+                    return;
+                }
+
+                if (confirm("탈퇴 신청을 반려하고 사용자 상태를 복구하시겠습니까?")) {
+                    // 자바스크립트로 화면에 보이지 않는 임시 폼을 동적으로 생성
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = /*[[@{/admin/withdrawal/reject}]]*/ '/admin/withdrawal/reject';
+
+                    // userId 데이터 추가
+                    const userIdInput = document.createElement('input');
+                    userIdInput.type = 'hidden';
+                    userIdInput.name = 'userId';
+                    userIdInput.value = userId;
+                    form.appendChild(userIdInput);
+
+                    // rejectReason 데이터 추가
+                    const reasonInput = document.createElement('input');
+                    reasonInput.type = 'hidden';
+                    reasonInput.name = 'rejectReason';
+                    reasonInput.value = reason;
+                    form.appendChild(reasonInput);
+
+                    // memo 데이터 가져오기
+                    const memoInput = document.getElementById('adminMemo');
+                    memoInput.type = 'hidden';
+                    memoInput.name = 'adminMemo';
+                    memoInput.value = adminMemo;
+
+                    // 문서를 본문에 잠깐 붙여서 submit 실행 (HTML5 표준 방식)
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        }
+    </script>
+</div>
+</html>

@@ -2,14 +2,17 @@ package com.example.epcot_thymeleaf.controller;
 
 import com.example.epcot_thymeleaf.entity.BoardEntity;
 import com.example.epcot_thymeleaf.entity.BoardFileEntity;
+import com.example.epcot_thymeleaf.entity.CommentEntity;
 import com.example.epcot_thymeleaf.entity.UserEntity;
 import com.example.epcot_thymeleaf.repository.BoardFileRepository;
 import com.example.epcot_thymeleaf.repository.UserRepository;
 import com.example.epcot_thymeleaf.service.BoardFileService;
 import com.example.epcot_thymeleaf.service.BoardService;
+import com.example.epcot_thymeleaf.service.CommentService;
 import com.example.epcot_thymeleaf.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -34,6 +37,7 @@ import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/board")
 @RequiredArgsConstructor
@@ -44,29 +48,32 @@ public class BoardController {
   private final UserRepository userRepository;
   private final BoardFileService boardFileService;
   private final BoardFileRepository boardFileRepository;
+  private final CommentService commentService;
 
   @GetMapping("/list")
-  public String boardListPage(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model, Authentication user) {
+  public String boardListPage(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model, Authentication user, HttpSession session) {
     if (user != null) {
       model.addAttribute("loginId", user.getName());
-      System.out.println("Username is not null");
+      log.info("User session : " + session.getId());
+      log.info("User session : " + session);
     }
 
-//    List<BoardEntity> boardList = boardService.getBoardList   ();
+//    Object notice = request.getSession().getAttribute("userNotice");
+//    System.out.println("컨트롤러에서 확인한 알림 메시지: " + notice);
 
     Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
     model.addAttribute("boardPage", boardPage);
     model.addAttribute("boardList", boardPage.getContent());
     model.addAttribute("page", boardPage.getNumber());
 
-    return "/board/board-list";
+    return "board/list";
   }
 
   @GetMapping("/write")
   public String boardWritePage(BoardEntity board, Model model) {
     model.addAttribute("item", board);
 
-    return "board/board-write";
+    return "board/write";
   }
 
   @PostMapping("/write")
@@ -88,7 +95,7 @@ public class BoardController {
       model.addAttribute("title", form.getTitle());
       model.addAttribute("content", form.getContent());
 
-      return "board/board-write";
+      return "board/write";
     }
 
     if (form.getContent() == null || form.getContent().trim().isBlank()) {
@@ -96,7 +103,7 @@ public class BoardController {
       model.addAttribute("title", form.getTitle());
       model.addAttribute("content", form.getContent());
 
-      return "board/board-write";
+      return "board/write";
     }
 
     UserEntity loginUser = userRepository.findByUsername(userDetails.getUsername())
@@ -130,15 +137,17 @@ public class BoardController {
 
     BoardEntity board = boardService.getBoardItem(id);
     Page<BoardEntity> boardPage = boardService.getBoardPage(pageable);
+    List<CommentEntity> comments = commentService.findCommentsByPostId(id);
 
     model.addAttribute("item", board);
     model.addAttribute("attachedFiles", boardFileService.getFiles(id));
 
     model.addAttribute("page", boardPage.getNumber());
+    model.addAttribute("comments", comments);
 
 //    boardFileService.preview();
 
-    return "board/board-detail";
+    return "board/detail";
   }
 
   @GetMapping("/board/files/{fileId}/view")
@@ -176,7 +185,7 @@ public class BoardController {
     model.addAttribute("item", board);
     model.addAttribute("attachedFiles", boardFileService.getFiles(id));
 
-    return "board/board-edit";
+    return "board/edit";
   }
 
   @PostMapping("/edit/{id}")
@@ -185,7 +194,8 @@ public class BoardController {
       @ModelAttribute("item") BoardEntity form,
       @RequestParam List<MultipartFile> files,
       @RequestParam(required = false) List<Long> deleteFileIds,
-      HttpSession httpSession) throws IOException {
+      HttpSession httpSession
+    ) throws IOException {
 
     form.setId(id);
 

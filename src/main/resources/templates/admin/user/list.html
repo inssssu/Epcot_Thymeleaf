@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<body class="container mt-5">
+<header>
+    <div th:replace="~{fragment/header :: header}"></div>
+</header>
+    <div class="container mt-5">
+        <h2>사용자 관리</h2>
+
+<!--        <div>-->
+<!--            <button>회원탈퇴</button>-->
+<!--        </div>-->
+        <table class="table table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>사용자명</th>
+                    <th>현재 상태</th>
+                    <th>탈퇴 요청일</th>
+                    <th>관리 작업</th>
+                    <th>사용자 구분</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${userList}">
+                    <td th:text="${user.id}">1</td>
+                    <td th:text="${user.username}">test1</td>
+                    <td>
+                        <span th:if="${user.status?.statusName == 'active'}" class="badge bg-success">활동중</span>
+                        <span th:if="${user.status?.statusName == 'withdrawal_req'}" class="badge bg-warning text-dark">탈퇴대기</span>
+                        <span th:if="${user.status.statusName == 'stage_3_final'}" class="badge bg-secondary">탈퇴완료</span>
+                        <span th:if="${user.status.statusName == 'suspended'}" class="badge bg-danger">정지</span>
+                    </td>
+                    <td th:text="${#temporals.format(user.withdrawalRequestedAt, 'yyyy-MM-dd HH:mm')}">-</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <form th:action="@{/admin/user/suspend}" method="post"
+                                  onsubmit="return confirm('이 계정을 정지하시겠습니까?');">
+                                <input type="hidden" name="userId" th:value="${user.id}">
+                                <button type="submit" class="btn btn-outline-danger">계정정지</button>
+                            </form>
+
+                            <div th:if="${user.status.statusName == 'withdrawal_req'}" style="display: flex; gap: 5px;">
+                                <a th:href="@{/admin/withdrawal/first/{id}(id=${user.id})}" class="btn btn-outline-secondary">탈퇴검토</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span th:if="${user.role?.roleName == 'user'}" class="badge bg-secondary">일반 사용자</span>
+                        <span th:if="${user.role?.roleName == 'admin'}" class="badge bg-success">일반 관리자</span>
+                        <span th:if="${user.role?.roleName == 'master_admin'}" class="badge bg-primary">최고 관리자</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
+<script>
+    function askReason(form) {
+        const reason = prompt("반려 사유를 입력해주세요 : ");
+        if (reason === null) {
+            return false;
+        }
+
+        if (reason.trim() === "") {
+            alert("사유를 입력해 주세요");
+            return false;
+        }
+
+        form.querySelector('#reasonInput').value = reason;
+        return confirm("탈퇴 신청을 반려하시겠습니까?");
+    }
+
+</script>
